@@ -1,0 +1,230 @@
+from __future__ import annotations
+from sqlmodel import SQLModel, Field, ForeignKey, Relationship
+from typing import Optional, List
+
+
+class CandidateEndorsementsORM(SQLModel, table=True):
+    __tablename__ = 'candidate_endorsements'
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    candidate_office_id: Optional[int] = Field(default=None)
+    district: str = Field(...)
+    district_number: int = Field(...)
+    paxton: Optional[bool] = Field(default=None)
+    candidate_first_name: str = Field(...)
+    candidate_last_name: str = Field(...)
+    abbott: Optional[bool] = Field(default=None)
+    perry: Optional[bool] = Field(default=None)
+    miller: Optional[bool] = Field(default=None)
+    patrick: Optional[bool] = Field(default=None)
+
+    # candidates: CandidateORM = Relationship(back_populates='endorsements')
+
+
+class CandidateORM(SQLModel, table=True):
+    __tablename__ = 'candidates'
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    full_name: str = Field(...)
+    first_name: str = Field(...)
+    last_name: str = Field(...)
+    incumbent: Optional[bool] = Field(default=None)
+    party: str = Field(...)
+    early_votes: int = Field(...)
+    total_votes: int = Field(...)
+    percent: float = Field(...)
+    color: str = Field(...)
+    ballot_order: int = Field(...)
+    endorsements_id: Optional[int] = Field(default=None, foreign_key='candidate_endorsements.id')
+
+    # endorsements: CandidateEndorsementsORM = Relationship(back_populates='candidates')
+
+
+class RaceORM(SQLModel, table=True):
+    __tablename__ = 'races'
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    office: str = Field(...)
+    office_type: str = Field(...)
+    office_district: Optional[str] = Field(default=None)
+    total_votes: int = Field(...)
+    ballot_order: int = Field(...)
+    precincts_reporting: int = Field(...)
+    registered_voters: int = Field(...)
+    total_precincts: int = Field(...)
+
+    county_id: Optional[int] = Field(default=None, foreign_key='counties.id')
+
+    # candidates: CandidateORM = Relationship(back_populates='race')
+
+
+class SummaryORM(SQLModel, table=True):
+    __tablename__ = 'summaries'
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    precincts_reporting: int = Field(...)
+    total_precincts: int = Field(...)
+    percent_reporting: float = Field(...)
+    registered_voters: int = Field(...)
+    voted_counted: int = Field(...)
+    turnout_percent: float = Field(...)
+    poll_loc: int = Field(...)
+    poll_loc_reporting: int = Field(...)
+    poll_loc_percent: float = Field(...)
+
+    county_id: Optional[int] = Field(..., foreign_key='counties.id')
+
+
+class CountyORM(SQLModel, table=True):
+    __tablename__ = 'counties'
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str = Field(...)
+    registered_voters: int = Field(...)
+    color: str = Field(...)
+
+    # races: RaceORM = Relationship(back_populates='county')
+    # summary: SummaryORM = Relationship(back_populates='county')
+
+
+class StatewideCandidateSummaryORM(SQLModel, table=True):
+    __tablename__ = 'statewide_candidate_summaries'
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str = Field(...)
+    first_name: str = Field(...)
+    last_name: str = Field(...)
+    party: str = Field(...)
+    color: str = Field(...)
+    total_votes: int = Field(...)
+    ballot_order: int = Field(...)
+    endorsement_id: Optional[int] = Field(default=None, foreign_key='candidate_endorsements.id')
+
+    # endorsements: CandidateEndorsementsORM = Relationship(back_populates='candidates')
+
+
+class StatewideOfficeSummaryORM(SQLModel, table=True):
+    __tablename__ = 'statewide_office_summaries'
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str = Field(...)
+
+    # candidates: StatewideCandidateSummaryORM = Relationship(back_populates='office')
+
+# class CandidateEndorsementsModel(Base):
+#     __tablename__ = 'candidate_endorsements'
+#     id = Column(Integer, primary_key=True)
+#     candidate_id = Column(Integer)
+#     candidate_office_id = Column(Integer)
+#     district = Column(String, nullable=False)
+#     district_number = Column(Integer, nullable=False)
+#     candidate_first_name = Column(String, nullable=False)
+#     candidate_last_name = Column(String, nullable=False)
+#     paxton = Column(Boolean)
+#     abbott = Column(Boolean)
+#     perry = Column(Boolean)
+#     miller = Column(Boolean)
+#     patrick = Column(Boolean)
+#     # vote_percent = Column(Float)
+#     # win_or_made_runoff = Column(Boolean)
+#
+#
+# class CountyTurnoutReportModel(Base):
+#     __tablename__ = 'county_turnout_reports'
+#     __table_args__ = {'extend_existing': True}
+#     id = Column(Integer, primary_key=True)
+#     county_id = Column(Integer)
+#     county_name = Column(String)
+#     total_precincts = Column(Integer)
+#     precincts_reporting = Column(Integer)
+#     registered_voters = Column(Integer)
+#     votes_counted = Column(Integer)
+#     turnout_percent = Column(Float)
+#     polling_locations_total = Column(Integer)
+#     polling_locations_reporting = Column(Integer)
+#     polling_locations_percent = Column(Float)
+#     update_time = Column(DateTime)
+#
+#
+# class CountyCandidateDetailsModel(Base):
+#     __tablename__ = 'county_candidate_details'
+#     __table_args__ = {'extend_existing': True}
+#     id = Column(Integer, primary_key=True)
+#     candidate_id = Column(Integer)
+#     candidate_name = Column(String)
+#     candidate_first_name = Column(String)
+#     candidate_last_name = Column(String)
+#     candidate_party = Column(String)
+#     candidate_incumbent = Column(Boolean)
+#     candidate_early_votes = Column(Integer)
+#     candidate_election_day_votes = Column(Integer)
+#     candidate_total_votes = Column(Integer)
+#     candidate_vote_percent = Column(Float)
+#     candidate_palette_color = Column(String)
+#     candidate_office_id = Column(Integer)
+#     race_county_name = Column(String, ForeignKey('county_election_details.county_name'))
+#     race_id = Column(Integer, ForeignKey('county_race_details.office_id'))
+#     endorsement_id = Column(Integer, ForeignKey('candidate_endorsements.candidate_id'))
+#     endorsement = relationship('CandidateEndorsementsModel', backref='candidate', lazy='joined')
+#     update_time = Column(DateTime)
+#
+#
+# class CountyRaceDetailsModel(Base):
+#     __tablename__ = 'county_race_details'
+#     __table_args__ = {'extend_existing': True}
+#
+#     id = Column(Integer, primary_key=True)
+#     office_id = Column(Integer, ForeignKey('statewide_race_summary.office_id'))
+#     office_name = Column(String)
+#     office_type = Column(String)
+#     office_district_number = Column(Integer)
+#     office_total_votes = Column(Integer)
+#     county_id = Column(Integer, ForeignKey('county_election_details.county_id'))
+#     county_name = Column(String)
+#     update_time = Column(DateTime)
+#     candidates = relationship('CountyCandidateDetailsModel', backref='race', lazy='joined')
+#
+#
+# class CountyElectionDetailsModel(Base):
+#     __tablename__ = 'county_election_details'
+#     __table_args__ = {'extend_existing': True}
+#
+#     id = Column(Integer, primary_key=True)
+#     county_id = Column(Integer)
+#     county_name = Column(String)
+#     county_total_votes = Column(Integer)
+#     county_palette_color = Column(String)
+#     update_time = Column(DateTime)
+#     turnout_report_id = Column(Integer, ForeignKey('county_turnout_reports.county_id'))
+#     county_turnout_report = relationship('CountyTurnoutReportModel', backref='turnout_reports', lazy='joined')
+#     county_races = relationship('CountyRaceDetailsModel', backref='county', lazy='joined')
+#
+#
+# class StatewideCandidateSummaryModel(Base):
+#     __tablename__ = 'statewide_candidate_summary'
+#     __table_args__ = {'extend_existing': True}
+#
+#     id = Column(Integer, primary_key=True)
+#     candidate_name = Column(String)
+#     candidate_party = Column(String)
+#     candidate_palette_color = Column(String)
+#     candidate_total_votes = Column(Integer)
+#     candidate_ballot_order = Column(Integer)
+#     candidate_office_id = Column(Integer)
+#     race_summary_id = Column(Integer, ForeignKey('statewide_race_summary.office_id'))
+#     update_time = Column(DateTime)
+#
+#
+# class StatewideRaceSummaryModel(Base):
+#     __tablename__ = 'statewide_race_summary'
+#     __table_args__ = {'extend_existing': True}
+#     id = Column(Integer, primary_key=True)
+#     office_id = Column(Integer)
+#     office_name = Column(String)
+#     office_type = Column(String)
+#     office_district_number = Column(Integer)
+#     race_details_id = Column(Integer, ForeignKey('county_race_details.office_id'))
+#     county_candidates_id = Column(Integer, ForeignKey('county_candidate_details.candidate_office_id'))
+#     update_time = Column(DateTime)
+#     statewide_summary = relationship('StatewideCandidateSummaryModel', backref='race_summary', lazy='joined')
+#     county_candidates = relationship('CountyCandidateDetailsModel', backref='county', lazy='joined')
