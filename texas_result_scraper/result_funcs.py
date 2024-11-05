@@ -1,5 +1,6 @@
 from nameparser import HumanName
 
+
 def set_office_type(cls, values):
     if "PRESIDENT" in values['ON']:
         values['office_type'] = "POTUS"
@@ -88,8 +89,9 @@ def set_district_number(cls, values):
     return values
 
 
-def parse_candidate_name(cls, values):
-    name = HumanName(values['N'])
-    values['first_name'] = name.first
-    values['last_name'] = name.last
-    return values
+def parse_candidate_name(self):
+    name = HumanName(self.full_name)
+    print(name)
+    self.first_name = name.first
+    self.last_name = name.last
+    return self
