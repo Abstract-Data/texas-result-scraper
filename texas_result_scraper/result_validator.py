@@ -1,7 +1,7 @@
 
 from sqlmodel import SQLModel, Field as SQLModelField, Relationship, JSON, String, TIMESTAMP, Column, text
 from datetime import datetime
-from pydantic import model_validator, ConfigDict, field_validator, BaseModel
+from pydantic import model_validator, ConfigDict, field_validator, BaseModel, validator, root_validator
 from pydantic_extra_types.color import Color
 from typing import  Optional, Annotated,  ClassVar
 from pathlib import Path
@@ -28,6 +28,7 @@ class ElectionResultValidator(SQLModel):
         str_strip_whitespace=True,
         str_to_upper=True,
         populate_by_name=True,
+        validate_assignment=True,
     )
     created_at: ClassVar[datetime] = SQLModelField(
         sa_column=Column(
@@ -45,11 +46,11 @@ class ElectionResultValidator(SQLModel):
     )
 
 
-class ResultVersionNumber(ElectionResultValidator, table=True):
+class ResultVersionNumberBase(ElectionResultValidator):
     id: int = SQLModelField(alias='___versionNo', primary_key=True)
     election_date: str = SQLModelField(alias='elecDate')
-    statewide: list["StatewideOfficeSummary"] = Relationship(back_populates='version_number')
-    county: list["County"] = Relationship(back_populates='version_number')
+    # statewide: list["StatewideOfficeSummary"] = Relationship(back_populates='version_number')
+    # county: list["County"] = Relationship(back_populates='version_number')
 
 
 class CandidateRaceLink(SQLModel, table=True):
@@ -168,11 +169,11 @@ class CandidateEndorsements(ElectionResultValidator):
 # ENDORSEMENTS = [CandidateEndorsements(**endorsement) for endorsement in ENDORSEMENT_DICT] if ENDORSEMENT_DICT else []
 
 
-class Candidate(ElectionResultValidator, table=True):
+class CandidateBase(ElectionResultValidator):
     id: int = SQLModelField(primary_key=True)
-    full_name: str
-    first_name: str = SQLModelField(default=None)
-    last_name: str = SQLModelField(default=None)
+    full_name: str = SQLModelField(...)
+    first_name: Optional[str] = SQLModelField(default=None)
+    last_name: Optional[str] = SQLModelField(default=None)
     incumbent: Optional[bool] = SQLModelField(default=None)
     party: str
     early_votes: int
@@ -181,19 +182,20 @@ class Candidate(ElectionResultValidator, table=True):
     color: Color = SQLModelField(sa_type=String)
     ballot_order: int
     # endorsements: Optional[CandidateEndorsements] = None
-    race_id: Optional[int] = SQLModelField(foreign_key='racedetails.id')
-    race: "RaceDetails" = Relationship(back_populates='candidates', link_model=CandidateRaceLink)
-    office: "StatewideCandidateSummary" = Relationship(
-        back_populates='candidate_data',
-        link_model=StatewideCanadidateRaceLink)
+    race_id: Optional[int] = SQLModelField(default=None, foreign_key='racedetails.id')
+    # race: "RaceDetails" = Relationship(back_populates='candidates', link_model=CandidateRaceLink)
+    # office: "StatewideCandidateSummary" = Relationship(
+    #     back_populates='candidate_data',
+    #     link_model=StatewideCanadidateRaceLink)
 
     @model_validator(mode='before')
     @classmethod
     def set_incumbent(cls, values):
-        if "(I)" in values['N']:
-            values['incumbent'] = True
-        else:
-            values['incumbent'] = False
+        if _name := values.get('full_name'):
+            if "(I)" in _name:
+                values['incumbent'] = True
+            else:
+                values['incumbent'] = False
         return values
 
     @field_validator('party')
@@ -213,18 +215,22 @@ class Candidate(ElectionResultValidator, table=True):
         else:
             return value
 
-    @model_validator(mode='after')
-    def parse_name(self) -> "Candidate":
-        if self.full_name:
-            name = HumanName(self.full_name)
-            self.first_name = name.first
-            self.last_name = name.last
-            return self
 
+    @model_validator(mode='before')
+    def parse_name(cls, values):
+        if _name := values.get('full_name'):
+            parsed_name = HumanName(_name)
+            values['first_name'] = parsed_name.first
+            values['last_name'] = parsed_name.last
+        return values
 
-class RaceDetails(ElectionResultValidator, table=True):
+    @field_validator('color')
+    def validate_color(cls, v: Color):
+        return v.as_hex()
+
+class RaceDetailsBase(ElectionResultValidator):
     id: int = SQLModelField(alias='OID', primary_key=True)
-    office: str = SQLModelField(alias='ON')
+    office: str
     office_type: Optional[str] = None
     office_district: Optional[str] = None
     total_votes: int = SQLModelField(alias='T')
@@ -232,16 +238,16 @@ class RaceDetails(ElectionResultValidator, table=True):
     precincts_reporting: int = SQLModelField(alias='PR')
     registered_voters: int = SQLModelField(alias='OTRV')
     total_precincts: int = SQLModelField(alias='TPR')
-    candidates: list[Candidate] = Relationship(back_populates='race', link_model=CandidateRaceLink)
-    counties: list["County"] = Relationship(back_populates='races', link_model=RaceCountyLink)
-    office_summary: Optional["StatewideOfficeSummary"] = Relationship(back_populates="race_data", link_model=StatewideRaceCountyLink)
+    # candidates: list["Candidate"] = Relationship(back_populates='race', link_model=CandidateRaceLink)
+    # counties: list["County"] = Relationship(back_populates='races', link_model=RaceCountyLink)
+    # office_summary: Optional["StatewideOfficeSummary"] = Relationship(back_populates="race_data", link_model=StatewideRaceCountyLink)
 
-    _set_office_type = model_validator(mode='before')(funcs.set_office_type)
-    _set_district_number = model_validator(mode='before')(funcs.set_district_number)
+    # _set_office_type = model_validator(mode='after')(funcs.set_office_type)
+    # _set_district_number = model_validator(mode='after')(funcs.set_district_number)
 
 
-class CountySummary(ElectionResultValidator, table=True):
-    id: int = SQLModelField(primary_key=True)
+class CountySummaryBase(ElectionResultValidator):
+    id: Optional[int] = SQLModelField(default=None, primary_key=True)
     precincts_reporting: int = SQLModelField(default=None, alias='PRR')
     total_precincts: int = SQLModelField(default=None, alias='PRP')
     percent_reporting: float = SQLModelField(default=None, alias='P')
@@ -252,56 +258,53 @@ class CountySummary(ElectionResultValidator, table=True):
     poll_loc_reporting: int = SQLModelField(default=None, alias='PLR')
     poll_loc_percent: float = SQLModelField(default=None, alias='PLP')
     county_name: Optional[str] = SQLModelField(foreign_key='county.name')
-    counties: "County" = Relationship(back_populates='summary')
+    # counties: "County" = Relationship(back_populates='summary')
 
 
-class County(ElectionResultValidator, table=True):
+class CountyBase(ElectionResultValidator):
     name: str = SQLModelField(alias='N', primary_key=True)
     registered_voters: int = SQLModelField(alias='TV')
     color: Color = SQLModelField(alias='C', sa_type=String)
-    races: list[RaceDetails] = Relationship(back_populates='counties', link_model=RaceCountyLink)
-    summary: CountySummary = Relationship(back_populates='counties')
-    version_number: "ResultVersionNumber" = Relationship(back_populates='county')
     version_id: Optional[int] = SQLModelField(default=None, foreign_key='resultversionnumber.id')
+    # races: list["RaceDetails"] = Relationship(back_populates='counties', link_model=RaceCountyLink)
+    # summary: "CountySummary" = Relationship(back_populates='counties')
+    # version_number: "ResultVersionNumber" = Relationship(back_populates='county')
 
 
-class StatewideCandidateSummary(ElectionResultValidator, table=True):
-    name: str = SQLModelField(alias='N', primary_key=True)
-    first_name: str = None
-    last_name: str = None
+class StatewideCandidateSummaryBase(ElectionResultValidator):
+    name: str = SQLModelField(primary_key=True)
+    first_name: Optional[str] = SQLModelField(default=None)
+    last_name: Optional[str] = SQLModelField(default=None)
     party: str = SQLModelField(alias='P')
     color: Color = SQLModelField(alias='C', sa_type=String)
     total_votes: int = SQLModelField(alias='T')
     ballot_order: int = SQLModelField(alias='O')
     # endorsement_id: Optional[int] = None
     office_id: int = SQLModelField(foreign_key='statewideofficesummary.id')
-    office: "StatewideOfficeSummary" = Relationship(back_populates='candidates')
-    candidate_data: Candidate = Relationship(back_populates='office', link_model=StatewideCanadidateRaceLink)
+    # office: "StatewideOfficeSummary" = Relationship(back_populates='candidates')
+    # candidate_data: "Candidate" = Relationship(back_populates='office', link_model=StatewideCanadidateRaceLink)
 
-    _parse_name = model_validator(mode='after')(funcs.parse_candidate_name)
-    # @model_validator(mode='after')
-    # def add_endorsement(self):
-    #     # assuming endorsements is a list of all endorsements
-    #     for endorsement in ENDORSEMENTS:
-    #         if (self.first_name == endorsement.candidate_first_name and
-    #                 self.last_name == endorsement.candidate_last_name):
-    #             self.endorsement_id = endorsement.id
-    #             self.endorsements = endorsement
-    #             break
-    #     return self
+    @model_validator(mode='before')
+    @classmethod
+    def parse_name(cls, values) -> "Candidate":
+        if _name := values.get('name'):
+            name = HumanName(_name)
+            values['first_name'] = name.first
+            values['last_name'] = name.last
+        return values
 
 
-class StatewideOfficeSummary(ElectionResultValidator, table=True):
+class StatewideOfficeSummaryBase(ElectionResultValidator):
     id: int = SQLModelField(alias='OID', primary_key=True)
     name: str = SQLModelField(alias='ON')
     office_type: Optional[str] = None
     office_district: Optional[str] = None
     winner: Optional[str] = SQLModelField(default=None)
     winner_party: Optional[str] = SQLModelField(default=None)
-    candidates: list["StatewideCandidateSummary"] = Relationship(back_populates='office')
-    race_data: "RaceDetails" = Relationship(back_populates='office_summary', link_model=StatewideRaceCountyLink)
     version_id: Optional[int] = SQLModelField(default=None, foreign_key='resultversionnumber.id')
-    version_number: "ResultVersionNumber" = Relationship(back_populates='statewide')
+    # candidates: list["StatewideCandidateSummary"] = Relationship(back_populates='office')
+    # race_data: "RaceDetails" = Relationship(back_populates='office_summary', link_model=StatewideRaceCountyLink)
+    # version_number: "ResultVersionNumber" = Relationship(back_populates='statewide')
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -312,3 +315,36 @@ class StatewideOfficeSummary(ElectionResultValidator, table=True):
         self.winner = _winner.name
         self.winner_party = _winner.party
         return self
+
+
+class ResultVersionNumber(ResultVersionNumberBase, table=True):
+    statewide: list["StatewideOfficeSummary"] = Relationship(back_populates='version_number')
+    county: list["County"] = Relationship(back_populates='version_number')
+
+class Candidate(CandidateBase, table=True):
+    race: "RaceDetails" = Relationship(back_populates='candidates', link_model=CandidateRaceLink)
+    office: "StatewideCandidateSummary" = Relationship(
+        back_populates='candidate_data',
+        link_model=StatewideCanadidateRaceLink)
+
+class RaceDetails(RaceDetailsBase, table=True):
+    candidates: list["Candidate"] = Relationship(back_populates='race', link_model=CandidateRaceLink)
+    counties: list["County"] = Relationship(back_populates='races', link_model=RaceCountyLink)
+    office_summary: Optional["StatewideOfficeSummary"] = Relationship(back_populates="race_data", link_model=StatewideRaceCountyLink)
+
+class CountySummary(CountySummaryBase, table=True):
+    counties: "County" = Relationship(back_populates='summary')
+
+class County(CountyBase, table=True):
+    races: list["RaceDetails"] = Relationship(back_populates='counties', link_model=RaceCountyLink)
+    summary: "CountySummary" = Relationship(back_populates='counties')
+    version_number: "ResultVersionNumber" = Relationship(back_populates='county')
+
+class StatewideCandidateSummary(StatewideCandidateSummaryBase, table=True):
+    office: "StatewideOfficeSummary" = Relationship(back_populates='candidates')
+    candidate_data: "Candidate" = Relationship(back_populates='office', link_model=StatewideCanadidateRaceLink)
+
+class StatewideOfficeSummary(StatewideOfficeSummaryBase, table=True):
+    candidates: list["StatewideCandidateSummary"] = Relationship(back_populates='office')
+    race_data: "RaceDetails" = Relationship(back_populates='office_summary', link_model=StatewideRaceCountyLink)
+    version_number: "ResultVersionNumber" = Relationship(back_populates='statewide')

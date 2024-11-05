@@ -60,11 +60,15 @@ class ElectionResultTicker:
         self.url_file = TomlReader(Path(__file__).parent / 'texas_results_urls.toml').data
 
     def get_newest_version(self):
-        self.version_no = validators.ResultVersionNumber(**self.scraper.get(
+        _version = self.scraper.get(
             self.url_file['result_version_url'].format(
                 electionId=self.election_id
             )
-        ).json())
+        ).json()
+        self.version_no = validators.ResultVersionNumber(
+            id=_version['___versionNo'],
+            election_date=_version['elecDate']
+        )
         return self
 
     def get_county_data(self):
@@ -77,7 +81,6 @@ class ElectionResultTicker:
                 versionNo=self.version_no.id
             )
         ).json().values())
-
         for _county in _county_data:
             county_races = []
             for race in _county['Races'].values():
@@ -91,8 +94,18 @@ class ElectionResultTicker:
                     percent=x['PE'],
                     ballot_order=x['O'],
                 ) for x in race['C'].values()]
-                print(_candidates)
-                county_races.append(validators.RaceDetails(**race, candidates=_candidates))
+                county_races.append(
+                    validators.RaceDetails(
+                        id=race['OID'],
+                        office=race['ON'],
+                        total_votes=race['T'],
+                        ballot_order=race['O'],
+                        precincts_reporting=race['PR'],
+                        registered_voters=race['OTRV'],
+                        total_precincts=race['TPR'],
+                        candidates=_candidates
+                    )
+                )
             c = validators.County(
                 name=_county['N'],
                 registered_voters=_county['TV'],
