@@ -1,12 +1,14 @@
-from typing import Dict, List, ClassVar, Type, Generator
+from typing import Dict, List, ClassVar, Type, Generator, Optional
 import cfscrape
 import texas_result_scraper.result_validator as validators
 from pathlib import Path
 from texas_result_scraper.utils.toml_reader import TomlReader
 from dataclasses import dataclass, field
 from time import sleep
-from texas_result_scraper.result_db import Session, engine
-from sqlmodel import SQLModel
+from texas_result_scraper.result_db import Session
+from sqlmodel import SQLModel, Session, select, text
+from sqlalchemy.engine import Engine
+from sqlalchemy import event
 
 
 EXAMPLES = (47009, 242), (47010, 278), (49681, 665), (49666, 661)
@@ -44,6 +46,14 @@ EXAMPLES = (47009, 242), (47010, 278), (49681, 665), (49666, 661)
 #         ]
 
 
+def populate_office_details(mapper, connection, target):
+    if target.race_data:
+        session = Session.object_session(target)
+        race_details = session.query(validators.RaceDetails).filter_by(id=target.race_data.id).first()
+        if race_details:
+            target.office_type = race_details.office_type
+            target.office_district = race_details.office_district
+
 @dataclass
 class ElectionResultTicker:
     election_id: int
@@ -52,9 +62,11 @@ class ElectionResultTicker:
     scraper: ClassVar[cfscrape.CloudflareScraper] = cfscrape.create_scraper()
     statewide_data: List[validators.StatewideOfficeSummary] = field(default_factory=list)
     county_data: List = field(default_factory=list)
+    candidate_cache = {}  # Add a cache for candidates
+    race_cache = {}  # Add
     endorsements: List[validators.CandidateEndorsements] = field(default=None)
     url_file: Dict[str, str] = field(init=False)
-    ready_to_load: List[SQLModel] = field(default=None)
+    engine: Optional[Engine] = None
 
     def __post_init__(self):
         self.url_file = TomlReader(Path(__file__).parent / 'texas_results_urls.toml').data
@@ -81,44 +93,68 @@ class ElectionResultTicker:
                 versionNo=self.version_no.id
             )
         ).json().values())
-        for _county in _county_data:
-            county_races = []
+        return _county_data
+
+    def setup_county_data(self):
+        for _county in self.get_county_data():
+            c = validators.County(
+                name=_county['N'],
+                registered_voters=_county['TV'],
+                color=_county['C'],
+                version_number=self.version_no,
+            )
+
+            c.summary = validators.CountySummary(
+                **_county['Summary'],
+                county_name=c.name,
+            )
             for race in _county['Races'].values():
-                _candidates = [validators.Candidate(
-                    id=x['id'],
-                    full_name=x['N'],
-                    party=x['P'],
-                    color=x['C'],
-                    early_votes=x['EV'],
-                    total_votes=x['V'],
-                    percent=x['PE'],
-                    ballot_order=x['O'],
-                ) for x in race['C'].values()]
-                county_races.append(
-                    validators.RaceDetails(
-                        id=race['OID'],
+                race_id = race['OID']
+                if race_id not in self.race_cache:
+                    _race_data = validators.RaceDetails(
+                        id=race_id,
                         office=race['ON'],
                         total_votes=race['T'],
                         ballot_order=race['O'],
                         precincts_reporting=race['PR'],
                         registered_voters=race['OTRV'],
                         total_precincts=race['TPR'],
-                        candidates=_candidates
                     )
-                )
-            c = validators.County(
-                name=_county['N'],
-                registered_voters=_county['TV'],
-                color=_county['C'],
-                races=county_races,
-                version_number=self.version_no,
-            )
-            c.summary = validators.CountySummary(
-                **_county['Summary'],
-                county_name=c.name,
-            )
+                    self.race_cache[race_id] = _race_data
+                else:
+                    _race_data = self.race_cache[race_id]
+
+                for candidate in race['C'].values():
+                    # Use cache to avoid duplicate candidates
+                    candidate_id = candidate['id']
+                    if candidate_id not in self.candidate_cache:
+                        _candidate_name = validators.CandidateName(
+                            id=candidate_id,
+                            full_name=candidate['N'],
+                            party=candidate['P']
+                        )
+                        self.candidate_cache[candidate_id] = _candidate_name
+                    else:
+                        _candidate_name = self.candidate_cache[candidate_id]
+
+                    # Add relationships
+                    if c not in _candidate_name.county_name:
+                        _candidate_name.county_name.append(c)
+
+                    # Add results
+                    _candidate_results = validators.CandidateCountyResults(
+                        color=candidate['C'],
+                        early_votes=candidate['EV'],
+                        total_votes=candidate['V'],
+                        percent=candidate['PE'],
+                        ballot_order=candidate['O'],
+                    )
+                    _candidate_name.county_results.append(_candidate_results)
+                    if _race_data not in _candidate_name.race:
+                        _race_data.candidates.append(_candidate_name)
+                c.races.append(_race_data)
             self.county_data.append(c)
-        # self.version_no.county = self.county_data
+        self.version_no.county = self.county_data
         return self
 
     def get_statewide_data(self):
@@ -131,8 +167,10 @@ class ElectionResultTicker:
                 versionNo=self.version_no.id
             )
         ).json()['OS']
+        return _statewide_data
 
-        for office in _statewide_data:
+    def setup_statewide_data(self):
+        for office in self.get_statewide_data():
             office_summary = validators.StatewideOfficeSummary(
                 id=office['OID'],
                 name=office['ON'],
@@ -163,18 +201,107 @@ class ElectionResultTicker:
 
     def update_data(self):
         self.get_newest_version()
-        self.get_county_data()
-        self.get_statewide_data()
         sleep(5)
         return self
 
-    def update_database(self):
-        SQLModel.metadata.create_all(bind=engine)
+    def initial_setup(self):
+        self.get_newest_version()
+        self.setup_county_data()
+        self.setup_statewide_data()
+        SQLModel.metadata.create_all(bind=self.engine)
         # self.logger.warning("func:update_database ENABLED")
-        with Session(engine) as session:
-            session.add_all(self.version_no.statewide)
-            session.commit()
+        with Session(self.engine) as session:
+            try:
+                # First add version number
+                session.add(self.version_no)
+
+                # Cache to track what we've already added
+                processed_races = set()
+                processed_candidates = set()
+                processed_counties = set()
+
+                # Process each county
+                for county in self.county_data:
+                    if county.name not in processed_counties:
+                        # Add county summary first
+                        if county.summary:
+                            session.add(county.summary)
+
+                        # Process races
+                        for race in county.races:
+                            if race.id not in processed_races:
+                                session.add(race)
+                                processed_races.add(race.id)
+
+                                # Process candidates for this race
+                                for candidate in race.candidates:
+                                    if candidate.id not in processed_candidates:
+                                        session.add(candidate)
+                                        processed_candidates.add(candidate.id)
+
+                                        # Add candidate results
+                                        for result in candidate.county_results:
+                                            session.add(result)
+
+                        # Add the county after its relationships
+                        session.add(county)
+                        processed_counties.add(county.name)
+                # Commit everything at once at the end
+                session.commit()
+            except Exception as e:
+                session.rollback()
+                print(f"Error during database update: {e}")
+                raise
+
         # self.logger.info("Database updated")
+    def refresh_data(self):
+        self.get_newest_version()
+        self.get_county_data()
+        self.get_statewide_data()
+        with Session(self.engine) as session:
+            session.merge(self.version_no)
+            for county in self.county_data:
+                _existing_county = session.exec(select(validators.County).where(validators.County.name == county.name)).first()
+                _existing_county.summary = county.summary
+
+                for race in county.races:
+                    _existing_race = session.exec(select(validators.RaceDetails).where(validators.RaceDetails.id)).first()
+                    for candidate in race.candidates:
+                        _existing_candidate = session.exec(select(validators.Candidate).where(validators.Candidate.id == candidate.id)).first()
+                        _existing_candidate.county_name.append(_existing_county)
+                        for result in candidate.county_results:
+                            _existing_candidate.county_results.append(result)
+                            session.add(_existing_candidate)
+                        session.add(_existing_candidate)
+                    session.add(_existing_race)
+                session.add(_existing_county)
+            session.commit()
+
+            for office in self.statewide_data:
+                _existing_office = session.exec(select(validators.StatewideOfficeSummary).where(validators.StatewideOfficeSummary.id == office.id)).first()
+                for candidate in office.candidates:
+                    _existing_candidate = session.exec(select(validators.StatewideCandidateSummary).where(validators.StatewideCandidateSummary.id == candidate.id)).first()
+                    _existing_candidate.office_id = _existing_office.id
+                    _existing_candidate.version_id = _existing_office.version_id
+                    _existing_candidate.candidate_data = candidate.candidate_data
+                    session.add(_existing_candidate)
+                session.add(_existing_office)
+            session.commit()
+
+            #     for race in county.races:
+            #         _existing_race = session.exec(select(validators.RaceDetails).where(validators.RaceDetails.id == race.id)).first()
+            #
+            #         for candidate in race.candidates:
+            #             _existing_candidate = session.exec(select(validators.Candidate).where(validators.Candidate.id == candidate.id)).first()
+            #             _existing_candidate.county_name.append(_existing_county)
+            #             for result in candidate.county_results:
+            #                 _existing_candidate.county_results.append(result)
+            #             _existing_race.candidates.append(_existing_candidate)
+            #             session.refresh(_existing_candidate)
+            #         session.refresh(_existing_race)
+            # session.commit()
+
+
 
     # def auto_refresh(self):
     #     # self.logger.warning("func:auto_refresh ENABLED")
