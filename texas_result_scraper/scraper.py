@@ -1,5 +1,5 @@
 from typing import Dict, List, ClassVar, Type, Generator, Optional
-import cfscrape
+import cfscrape # type: ignore
 import texas_result_scraper.result_validator as validators
 from pathlib import Path
 from texas_result_scraper.utils.toml_reader import TomlReader
