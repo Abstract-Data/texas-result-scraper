@@ -19,5 +19,15 @@ jobs:
       - name: Fetch data
         uses: githubocto/flat@v3
         with:
-          http_url: https://results.texas-election.com/static/data/election/49664
-          downloaded_filename: texas-g-2024-results.json
+          http_url: https://results.texas-election.com/static/data/election/49664/1009/County.json
+          downloaded_filename: texas-g-2024-results-county.json
+      - name: Fetch data
+        uses: githubocto/flat@v3
+        with:
+          http_url: https://results.texas-election.com/static/data/election/49664/1009/OfficeSummary.json
+          downloaded_filename: texas-g-2024-results-summary.json
+      - name: Fetch data
+        uses: githubocto/flat@v3
+        with:
+          http_url: https://results.texas-election.com/static/data/election/49664/1009/Home.json
+          downloaded_filename: texas-g-2024-results-home.json
