@@ -24,18 +24,12 @@ election_utils = { path = "/Users/johneakin/PyCharmProjects/election-utils", dev
 state_voterfiles = { path = "/Users/johneakin/PyCharmProjects/state-voterfiles", develop = true}
 cfscrape = {path = "/Users/johneakin/cloudflare-scrape"}
 
-# Git dependencies for production
-[tool.poetry.dependencies.election_utils]
-git = "https://github.com/jreakin/jre-election-utils.git"
-
-[tool.poetry.dependencies.state_voterfiles]
-git = "https://github.com/Abstract-Data/state-voterfiles.git"
-
-[tool.poetry.dependencies.cfscrape]
-git = "https://github.com/Anorov/cloudflare-scrape.git"
-
 [tool.poetry.extras]
-prod = ["election_utils", "state_voterfiles", "cfscrape"]
+prod = [
+    "election_utils@git+https://github.com/jreakin/jre-election-utils.git",
+    "state_voterfiles@git+https://github.com/Abstract-Data/state-voterfiles.git",
+    "cfscrape@git+https://github.com/Anorov/cloudflare-scrape.git"
+]
 
 [build-system]
 requires = ["poetry-core"]
