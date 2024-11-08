@@ -71,7 +71,7 @@ class ElectionResultTicker:
     def __post_init__(self):
         self.url_file = TomlReader(Path(__file__).parent / 'texas_results_urls.toml').data
 
-    def get_newest_version(self):
+    def _get_newest_version(self):
         _version = self.scraper.get(
             self.url_file['result_version_url'].format(
                 electionId=self.election_id
@@ -83,7 +83,7 @@ class ElectionResultTicker:
         )
         return self
 
-    def get_county_data(self):
+    def _get_county_data(self):
         _county_data = list(self.scraper.get(
             self.url_file[
                 'county_url'
@@ -95,7 +95,7 @@ class ElectionResultTicker:
         ).json().values())
         return _county_data
 
-    def setup_county_data(self):
+    def _setup_county_data(self):
         for _county in self.get_county_data():
             c = validators.County(
                 name=_county['N'],
@@ -157,7 +157,7 @@ class ElectionResultTicker:
         self.version_no.county = self.county_data
         return self
 
-    def get_statewide_data(self):
+    def _get_statewide_data(self):
         _statewide_data = self.scraper.get(
             self.url_file[
                 'office_url'
@@ -169,7 +169,7 @@ class ElectionResultTicker:
         ).json()['OS']
         return _statewide_data
 
-    def setup_statewide_data(self):
+    def _setup_statewide_data(self):
         for office in self.get_statewide_data():
             office_summary = validators.StatewideOfficeSummary(
                 id=office['OID'],
@@ -199,24 +199,24 @@ class ElectionResultTicker:
         self.version_no.statewide = self.statewide_data
         return self
 
-    def update_data(self):
+    def _update_data(self):
         self.get_newest_version()
         sleep(5)
         return self
     
     def github_flat_file(self):
-        self.get_newest_version()
-        self.setup_county_data()
-        self.setup_statewide_data()
+        self._get_newest_version()
+        self._setup_county_data()
+        self._setup_statewide_data()
         with open(Path(__file__).parent / 'data'/ f'texas-election-{self.version_no.id}.json', 'w') as f:
             f.write(self.version_no.model_dump_json())
         return self
     
 
     def initial_setup(self):
-        self.get_newest_version()
-        self.setup_county_data()
-        self.setup_statewide_data()
+        self._get_newest_version()
+        self._setup_county_data()
+        self._setup_statewide_data()
         SQLModel.metadata.create_all(bind=self.engine)
         # self.logger.warning("func:update_database ENABLED")
         with Session(self.engine) as session:
