@@ -20,3 +20,12 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: 3.x
+      - name: Install dependencies
+        run: |
+          deno install --allow-read --allow-write --allow-net --unstable -f -n flat https://deno.land/x/flat/mod.ts
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry install
+      - name: Run flat
+        run: |
+          poetry run python main.py

@@ -203,6 +203,15 @@ class ElectionResultTicker:
         self.get_newest_version()
         sleep(5)
         return self
+    
+    def github_flat_file(self):
+        self.get_newest_version()
+        self.setup_county_data()
+        self.setup_statewide_data()
+        with open(Path(__file__).parent / 'data'/ f'texas-election-{self.version_no.id}.json', 'w') as f:
+            f.write(self.version_no.model_dump_json())
+        return self
+    
 
     def initial_setup(self):
         self.get_newest_version()

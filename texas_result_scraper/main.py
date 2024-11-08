@@ -9,7 +9,7 @@ from time import sleep
 from sqlmodel import Session, text
 
 P2024_ELECTION_RESULTS = ElectionResultTicker(election_id=49664, engine=psql_engine)
-P2024_ELECTION_RESULTS.initial_setup()
+P2024_ELECTION_RESULTS.github_flat_file()
 
 # with Session(engine) as session:
 #     session.execute(
