@@ -216,7 +216,7 @@ class ElectionResultTicker:
             county=self.county_data,
             statewide=self.statewide_data
         )
-        with open(Path(__file__).parent / 'data'/ f'texas-election-{self.version_no.id}.json', 'w') as f:
+        with open(Path(__file__).parent / 'data'/ f'tx-{self.election_id}-{self.version_no.id}.json', 'w') as f:
             f.write(_version_data.model_dump_json())
         return self
     
