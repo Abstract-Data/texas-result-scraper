@@ -101,6 +101,7 @@ class ResultVersionPublicModel(ResultVersionNumberBase):
     election_id: int
     statewide: list["StatewideOfficeSummary"]
     county: list["County"]
+    updated_at: datetime = SQLModelField(default=datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S"))
 
 class CandidateRaceLink(SQLModel, table=True):
     candidate_id: str = SQLModelField(foreign_key='candidatename.full_name', primary_key=True)
