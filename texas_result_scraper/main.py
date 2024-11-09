@@ -1,6 +1,6 @@
 from __future__ import annotations
-from texas_result_scraper.scraper import ElectionResultTicker, TomlReader
-from texas_result_scraper.result_db import engine, psql_engine
+from .scraper import ElectionResultTicker, TomlReader
+from .result_db import engine, psql_engine
 from pathlib import Path
 import csv
 import itertools

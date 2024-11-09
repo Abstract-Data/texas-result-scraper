@@ -1,15 +1,15 @@
 from typing import Dict, List, ClassVar, Type, Generator, Optional
-import cfscrape
-import texas_result_scraper.result_validator as validators
 from pathlib import Path
-from texas_result_scraper.utils.toml_reader import TomlReader
 from dataclasses import dataclass, field
 from time import sleep
-from texas_result_scraper.result_db import Session
 from sqlmodel import SQLModel, Session, select, text
 from sqlalchemy.engine import Engine
 from sqlalchemy import event
 
+import cfscrape
+from texas_result_scraper.utils.toml_reader import TomlReader
+from texas_result_scraper.result_db import Session
+import texas_result_scraper.result_validator as validators
 
 EXAMPLES = (47009, 242), (47010, 278), (49681, 665), (49666, 661)
 
