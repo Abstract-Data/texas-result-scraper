@@ -29,4 +29,3 @@ jobs:
       - name: Run flat
         run: |
           poetry run python main.py 
-        
