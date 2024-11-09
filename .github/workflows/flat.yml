@@ -34,9 +34,11 @@ jobs:
           python texas_result_scraper/main.py  
           git config --global user.email "dev@abstractdata.io"
           git config --global user.name "John R. Eakin"
+          git add -A
+          timestamp=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
           git fetch
           git add .
-          git commit -m "Update data"
+          git commit -m "Data updated at ${timestamp}"
           git push
 
 
