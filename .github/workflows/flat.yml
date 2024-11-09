@@ -31,4 +31,4 @@ jobs:
         run: ls -la
       - name: Run flat
         run: |
-          python texas_result_scraper/main.py 
+          python texas_result_scraper/main.py  
