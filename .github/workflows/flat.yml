@@ -35,8 +35,8 @@ jobs:
           git config --global user.email "dev@abstractdata.io"
           git config --global user.name "John R. Eakin"
           git fetch
-          git add texas_result_scraper/data
+          git add .
           git commit -m "Update data"
           git push
-          
+
 
