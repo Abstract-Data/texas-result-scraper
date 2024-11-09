@@ -17,7 +17,7 @@ from sqlalchemy.orm import declared_attr
 from datetime import datetime
 from pydantic import model_validator, ConfigDict, field_validator, BaseModel, validator, root_validator
 from pydantic_extra_types.color import Color
-from typing import  Optional, Annotated,  ClassVar
+from typing import  Optional, Annotated,  ClassVar, List
 from pathlib import Path
 import csv
 from nameparser import HumanName
@@ -74,8 +74,8 @@ class ResultVersionNumberBase(ElectionResultValidator):
     id: int = SQLModelField(alias='___versionNo', primary_key=True)
     election_id: int = SQLModelField(alias='___electionId')
     election_date: str = SQLModelField(alias='elecDate')
-    statewide: list["StatewideOfficeSummary"] = list()
-    county: list["County"] = list()
+    # statewide: Annotated[List["StatewideOfficeSummary"], Relationship()]
+    # county: Annotated[List["County"], Relationship()]
 
 
 class ResultVersionNumber(ResultVersionNumberBase, table=True):
@@ -96,6 +96,9 @@ class ResultVersionNumber(ResultVersionNumberBase, table=True):
         default=None
     )
 
+class ResultVersionPublicModel(ResultVersionNumberBase):
+    statewide: list["StatewideOfficeSummary"]
+    county: list["County"]
 
 class CandidateRaceLink(SQLModel, table=True):
     candidate_id: str = SQLModelField(foreign_key='candidatename.full_name', primary_key=True)

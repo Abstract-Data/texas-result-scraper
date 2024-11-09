@@ -39,4 +39,3 @@ jobs:
           git commit -m "Update data"
           git push
 
-          
