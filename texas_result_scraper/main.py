@@ -1,5 +1,5 @@
 from __future__ import annotations
-from texas_result_scraper.ç import ElectionResultTicker, TomlReader
+from texas_result_scraper.scraper import ElectionResultTicker, TomlReader
 from texas_result_scraper.result_db import engine, psql_engine
 from pathlib import Path
 import csv
@@ -10,6 +10,7 @@ from sqlmodel import Session, text
 
 P2024_ELECTION_RESULTS = ElectionResultTicker(election_id=49664, engine=psql_engine)
 P2024_ELECTION_RESULTS.github_flat_file()
+
 
 # with Session(engine) as session:
 #     session.execute(

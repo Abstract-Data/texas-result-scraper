@@ -74,8 +74,8 @@ class ResultVersionNumberBase(ElectionResultValidator):
     id: int = SQLModelField(alias='___versionNo', primary_key=True)
     election_id: int = SQLModelField(alias='___electionId')
     election_date: str = SQLModelField(alias='elecDate')
-    # statewide: list["StatewideOfficeSummary"] = Relationship(back_populates='version_number')
-    # county: list["County"] = Relationship(back_populates='version_number')
+    statewide: list["StatewideOfficeSummary"] = list()
+    county: list["County"] = list()
 
 
 class ResultVersionNumber(ResultVersionNumberBase, table=True):

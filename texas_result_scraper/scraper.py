@@ -209,8 +209,15 @@ class ElectionResultTicker:
         self._get_newest_version()
         self._setup_county_data()
         self._setup_statewide_data()
+        _version_validator = validators.ResultVersionNumberBase(
+            id=self.version_no.id,
+            election_date=self.version_no.election_date,
+            election_id=self.version_no.election_id,
+            statewide=self.statewide_data,
+            county=self.county_data,
+        )
         with open(Path(__file__).parent / 'data'/ f'texas-election-{self.version_no.id}.json', 'w') as f:
-            f.write(self.version_no.model_dump_json())
+            f.write(_version_validator.model_dump_json())
         return self
     
 
