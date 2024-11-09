@@ -215,9 +215,9 @@ requests = ">=2.23.0"
 
 [package.source]
 type = "git"
-url = "https://github.com/Anorov/cloudflare-scrape.git"
+url = "https://github.com/jreakin/jre-cfscraper.git"
 reference = "HEAD"
-resolved_reference = "e510962c608382bcef5de75033d60cc98cb9561d"
+resolved_reference = "b10d192bbc6affba9771bed23013d51869cb445f"
 
 [[package]]
 name = "chardet"
@@ -2387,4 +2387,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "309ee7836cd03e5f45ac9bf3f965f3f603bf6139b5534a288ec7a3a73bc8d369"
+content-hash = "2371c82836428abe5c4500cb7fafa37fafa7cba190da178a5007dfdacdde98e8"

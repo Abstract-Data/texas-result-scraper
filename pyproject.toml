@@ -17,7 +17,7 @@ pydantic-custom-types = "^0.2.2"
 psycopg2 = "^2.9.10"
 election_utils = { git = "https://github.com/jreakin/jre-election-utils.git", markers = "sys_platform == 'linux'" }
 state_voterfiles = { git = "https://github.com/Abstract-Data/state-voterfiles.git", markers = "sys_platform == 'linux'" }
-cfscrape = { git = "https://github.com/Anorov/cloudflare-scrape.git", markers = "sys_platform == 'linux'" }
+cfscrape = { git = "https://github.com/jreakin/jre-cfscraper.git", markers = "sys_platform == 'linux'" }
 
 [tool.poetry.dev-dependencies]
 election_utils = { path = "/Users/johneakin/PyCharmProjects/election-utils", develop = true, markers = "sys_platform == 'darwin'" }
