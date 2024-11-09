@@ -16,15 +16,17 @@ nameparser = "^1.1.3"
 pydantic-custom-types = "^0.2.2"
 psycopg2 = "^2.9.10"
 
-# Local dependencies for development
-election_utils = { path = "/Users/johneakin/PyCharmProjects/election-utils", develop = true, markers = "sys_platform == 'darwin'" }
-state_voterfiles = { path = "/Users/johneakin/PyCharmProjects/state-voterfiles", develop = true, markers = "sys_platform == 'darwin'" }
-cfscrape = { path = "/Users/johneakin/cloudflare-scrape", markers = "sys_platform == 'darwin'" }
+[tool.poetry.dev-dependencies]
+election_utils = { path = "/Users/johneakin/PyCharmProjects/election-utils", develop = true }
+state_voterfiles = { path = "/Users/johneakin/PyCharmProjects/state-voterfiles", develop = true }
+cfscrape = { path = "/Users/johneakin/cloudflare-scrape" }
 
-# Git dependencies for production
-election_utils = { git = "https://github.com/jreakin/jre-election-utils.git", markers = "sys_platform != 'darwin'" }
-state_voterfiles = { git = "https://github.com/Abstract-Data/state-voterfiles.git", markers = "sys_platform != 'darwin'" }
-cfscrape = { git = "https://github.com/Anorov/cloudflare-scrape.git", markers = "sys_platform != 'darwin'" }
+[tool.poetry.extras]
+prod = [
+    "election_utils@git+https://github.com/jreakin/jre-election-utils.git",
+    "state_voterfiles@git+https://github.com/Abstract-Data/state-voterfiles.git",
+    "cfscrape@git+https://github.com/Anorov/cloudflare-scrape.git"
+]
 
 
 [build-system]
