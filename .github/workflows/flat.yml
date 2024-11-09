@@ -27,6 +27,8 @@ jobs:
           pip install poetry
           poetry config virtualenvs.create false
           poetry install
+      - name: List directory structure
+        run: ls -la
       - name: Run flat
         run: |
-          poetry run python main.py 
+          python main.py 
