@@ -25,6 +25,7 @@ jobs:
           deno install --allow-read --allow-write --allow-net --unstable -f -n flat https://deno.land/x/flat/mod.ts
           python -m pip install --upgrade pip
           pip install poetry
+          poetry config virtualenvs.create false
           poetry install
       - name: Run flat
         run: |
