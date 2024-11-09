@@ -96,7 +96,7 @@ class ElectionResultTicker:
         return _county_data
 
     def _setup_county_data(self):
-        for _county in self.get_county_data():
+        for _county in self._get_county_data():
             c = validators.County(
                 name=_county['N'],
                 registered_voters=_county['TV'],
@@ -170,7 +170,7 @@ class ElectionResultTicker:
         return _statewide_data
 
     def _setup_statewide_data(self):
-        for office in self.get_statewide_data():
+        for office in self._get_statewide_data():
             office_summary = validators.StatewideOfficeSummary(
                 id=office['OID'],
                 name=office['ON'],
@@ -264,9 +264,9 @@ class ElectionResultTicker:
 
         # self.logger.info("Database updated")
     def refresh_data(self):
-        self.get_newest_version()
-        self.get_county_data()
-        self.get_statewide_data()
+        self._get_newest_version()
+        self._get_county_data()
+        self._get_statewide_data()
         with Session(self.engine) as session:
             session.merge(self.version_no)
             for county in self.county_data:
