@@ -32,3 +32,7 @@ jobs:
       - name: Run flat
         run: |
           python texas_result_scraper/main.py  
+          git add texas_result_scraper/data
+          git commit -m "Update data"
+          git push
+          
