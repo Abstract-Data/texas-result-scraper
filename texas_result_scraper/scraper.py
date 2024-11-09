@@ -79,7 +79,8 @@ class ElectionResultTicker:
         ).json()
         self.version_no = validators.ResultVersionNumber(
             id=_version['___versionNo'],
-            election_date=_version['elecDate']
+            election_date=_version['elecDate'],
+            election_id=self.election_id,
         )
         return self
 
