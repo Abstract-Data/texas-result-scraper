@@ -37,6 +37,8 @@ jobs:
           git add -A
           timestamp=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
           git fetch
-          git add .
+          git add texas_result_scraper/data
+          git add . 
           git commit -m "Data updated at ${timestamp}"
-          git push 
+          git push
+
