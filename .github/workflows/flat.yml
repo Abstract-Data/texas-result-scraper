@@ -37,3 +37,5 @@ jobs:
           git add texas_result_scraper/data
           git commit -m "Update data"
           git push
+
+          
