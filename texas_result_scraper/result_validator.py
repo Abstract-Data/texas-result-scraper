@@ -97,6 +97,8 @@ class ResultVersionNumber(ResultVersionNumberBase, table=True):
     )
 
 class ResultVersionPublicModel(ResultVersionNumberBase):
+    id: str
+    election_id: str
     statewide: list["StatewideOfficeSummary"]
     county: list["County"]
 
