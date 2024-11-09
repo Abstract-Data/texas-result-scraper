@@ -39,6 +39,4 @@ jobs:
           git fetch
           git add .
           git commit -m "Data updated at ${timestamp}"
-          git push
-
-
+          git push 
