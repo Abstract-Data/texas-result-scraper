@@ -1,0 +1,41 @@
+name: data
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+  push:
+    paths:
+      - .github/workflows/flat.yml
+jobs:
+  scheduled:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup deno
+        uses: denoland/setup-deno@main
+        with:
+          deno-version: v1.10.x
+      - name: Check out repo
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - name: Install dependencies
+        run: |
+          deno install --allow-read --allow-write --allow-net --unstable -f -n flat https://deno.land/x/flat/mod.ts
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry config virtualenvs.create false
+          poetry install
+      - name: List directory structure
+        run: ls -la
+      - name: Run flat
+        run: |
+          python texas_result_scraper/main.py  
+          git config --global user.email "dev@abstractdata.io"
+          git config --global user.name "John R. Eakin"
+          git fetch
+          git add texas_result_scraper/data
+          git commit -m "Update data"
+          git push
+
