@@ -28,4 +28,4 @@ jobs:
           poetry install --extras
       - name: Run flat
         run: |
-          poetry run python main.py  
+          poetry run python main.py 
