@@ -78,56 +78,49 @@ class ResultVersionNumberBase(ElectionResultValidator):
     # county: Annotated[List["County"], Relationship()]
 
 
-class ResultVersionNumber(ResultVersionNumberBase, table=True):
-    statewide: list["StatewideOfficeSummary"] = Relationship(back_populates='version_number')
-    county: list["County"] = Relationship(back_populates='version_number')
-    created_at: Optional[datetime] = SQLModelField(
-        sa_column=Column(
-            TIMESTAMP(timezone=True),
-            server_default=text("CURRENT_TIMESTAMP")
-        )
-    )
-    updated_at: Optional[datetime] = SQLModelField(
-        sa_column=Column(
-            TIMESTAMP(timezone=True),
-            server_default=text("CURRENT_TIMESTAMP"),
-            server_onupdate=text("CURRENT_TIMESTAMP"),
-        ),
-        default=None
-    )
+# class ResultVersionNumber(ResultVersionNumberBase, table=True):
+#     statewide: list["StatewideOfficeSummary"] = Relationship(back_populates='version_number')
+#     county: list["County"] = Relationship(back_populates='version_number')
+#     created_at: Optional[datetime] = SQLModelField(
+#         sa_column=Column(
+#             TIMESTAMP(timezone=True),
+#             server_default=text("CURRENT_TIMESTAMP")
+#         )
+#     )
+#     updated_at: Optional[datetime] = SQLModelField(
+#         sa_column=Column(
+#             TIMESTAMP(timezone=True),
+#             server_default=text("CURRENT_TIMESTAMP"),
+#             server_onupdate=text("CURRENT_TIMESTAMP"),
+#         ),
+#         default=None
+#     )
 
-class ResultVersionPublicModel(ResultVersionNumberBase):
-    id: int
-    election_id: int
-    statewide: list["StatewideOfficeSummary"]
-    county: list["County"]
-    updated_at: datetime = SQLModelField(default=datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S"))
+# class CandidateRaceLink(SQLModel, table=True):
+#     candidate_id: str = SQLModelField(foreign_key='candidatename.full_name', primary_key=True)
+#     race_id: int = SQLModelField(foreign_key="racedetails.id", primary_key=True)
 
-class CandidateRaceLink(SQLModel, table=True):
-    candidate_id: str = SQLModelField(foreign_key='candidatename.full_name', primary_key=True)
-    race_id: int = SQLModelField(foreign_key="racedetails.id", primary_key=True)
+# class CandidateCountyLink(SQLModel, table=True):
+#     county_id: str = SQLModelField(foreign_key='county.name', primary_key=True)
+#     candidate_id: int = SQLModelField(foreign_key='candidatename.id', primary_key=True)
 
-class CandidateCountyLink(SQLModel, table=True):
-    county_id: str = SQLModelField(foreign_key='county.name', primary_key=True)
-    candidate_id: int = SQLModelField(foreign_key='candidatename.id', primary_key=True)
+# class CandidateCountyResultsLink(SQLModel, table=True):
+#     candidate_id: int = SQLModelField(foreign_key='candidatename.id', primary_key=True)
+#     county_results_id: int = SQLModelField(foreign_key='candidatecountyresults.id', primary_key=True)
 
-class CandidateCountyResultsLink(SQLModel, table=True):
-    candidate_id: int = SQLModelField(foreign_key='candidatename.id', primary_key=True)
-    county_results_id: int = SQLModelField(foreign_key='candidatecountyresults.id', primary_key=True)
-
-class RaceCountyLink(SQLModel, table=True):
-    county_id: str = SQLModelField(foreign_key='county.name', primary_key=True)
-    race_id: int = SQLModelField(foreign_key="racedetails.id", primary_key=True)
+# class RaceCountyLink(SQLModel, table=True):
+#     county_id: str = SQLModelField(foreign_key='county.name', primary_key=True)
+#     race_id: int = SQLModelField(foreign_key="racedetails.id", primary_key=True)
 
 
-class StatewideRaceCountyLink(SQLModel, table=True):
-    statewide_office_id: int = SQLModelField(foreign_key='statewideofficesummary.id', primary_key=True)
-    race_id: int = SQLModelField(foreign_key="racedetails.id", primary_key=True)
+# class StatewideRaceCountyLink(SQLModel, table=True):
+#     statewide_office_id: int = SQLModelField(foreign_key='statewideofficesummary.id', primary_key=True)
+#     race_id: int = SQLModelField(foreign_key="racedetails.id", primary_key=True)
 
 
-class StatewideCanadidateRaceLink(SQLModel, table=True):
-    candidate_id: str = SQLModelField(foreign_key='candidatename.full_name', primary_key=True)
-    statewide_candidate_id: str = SQLModelField(foreign_key='statewidecandidatesummary.name', primary_key=True)
+# class StatewideCanadidateRaceLink(SQLModel, table=True):
+#     candidate_id: str = SQLModelField(foreign_key='candidatename.full_name', primary_key=True)
+#     statewide_candidate_id: str = SQLModelField(foreign_key='statewidecandidatesummary.name', primary_key=True)
 
 
 class CandidateEndorsements(ElectionResultValidator):
@@ -226,7 +219,7 @@ class CandidateEndorsements(ElectionResultValidator):
 # ENDORSEMENTS = [CandidateEndorsements(**endorsement) for endorsement in ENDORSEMENT_DICT] if ENDORSEMENT_DICT else []
 class CandidateNameBase(ElectionResultValidator):
     id: int = SQLModelField(primary_key=True)
-    full_name: str = SQLModelField(..., unique=True)
+    full_name: Optional[str] = SQLModelField(default=None, unique=True)
     first_name: Optional[str] = SQLModelField(default=None)
     last_name: Optional[str] = SQLModelField(default=None)
     incumbent: Optional[bool] = SQLModelField(default=None)
@@ -240,6 +233,8 @@ class CandidateNameBase(ElectionResultValidator):
     @model_validator(mode='before')
     @classmethod
     def set_incumbent(cls, values):
+        if isinstance(values, SQLModel):
+            values = values.model_dump()
         if _name := values.get('full_name'):
             if "(I)" in _name:
                 values['incumbent'] = True
@@ -268,34 +263,36 @@ class CandidateNameBase(ElectionResultValidator):
     @model_validator(mode='before')
     @classmethod
     def parse_name(cls, values):
-        if _name := values.get('full_name'):
+        _name = values.get('full_name')
+        if _name:
             parsed_name = HumanName(_name)
             values['first_name'] = parsed_name.first
             values['last_name'] = parsed_name.last
         return values
 
 
-class CandidateName(CandidateNameBase, table=True):
-    county_name: list["County"] = Relationship(back_populates='candidates', link_model=CandidateCountyLink)
-    county_results: list["CandidateCountyResults"] = Relationship(back_populates='candidate', link_model=CandidateCountyResultsLink)
-    race: list["RaceDetails"] = Relationship(back_populates='candidates', link_model=CandidateRaceLink)
-    office: "StatewideCandidateSummary" = Relationship(
-        back_populates='candidate_data',
-        link_model=StatewideCanadidateRaceLink)
-    created_at: Optional[datetime] = SQLModelField(
-        sa_column=Column(
-            TIMESTAMP(timezone=True),
-            server_default=text("CURRENT_TIMESTAMP")
-        )
-    )
-    updated_at: Optional[datetime] = SQLModelField(
-        sa_column=Column(
-            TIMESTAMP(timezone=True),
-            server_default=text("CURRENT_TIMESTAMP"),
-            server_onupdate=text("CURRENT_TIMESTAMP"),
-        ),
-        default=None
-    )
+# class CandidateName(CandidateNameBase, table=True):
+#     county_name: list["County"] = Relationship(back_populates='candidates', link_model=CandidateCountyLink)
+#     county_results: list["CandidateCountyResults"] = Relationship(back_populates='candidate', link_model=CandidateCountyResultsLink)
+#     race: list["RaceDetails"] = Relationship(back_populates='candidates', link_model=CandidateRaceLink)
+#     office: "StatewideCandidateSummary" = Relationship(
+#         back_populates='candidate_data',
+#         link_model=StatewideCanadidateRaceLink)
+#     created_at: Optional[datetime] = SQLModelField(
+#         sa_column=Column(
+#             TIMESTAMP(timezone=True),
+#             server_default=text("CURRENT_TIMESTAMP")
+#         )
+#     )
+#     updated_at: Optional[datetime] = SQLModelField(
+#         sa_column=Column(
+#             TIMESTAMP(timezone=True),
+#             server_default=text("CURRENT_TIMESTAMP"),
+#             server_onupdate=text("CURRENT_TIMESTAMP"),
+#         ),
+#         default=None
+#     )
+
 
 class CandidateCountyResultsBase(ElectionResultValidator):
     id: Optional[int] = SQLModelField(default=None, primary_key=True)
@@ -310,22 +307,22 @@ class CandidateCountyResultsBase(ElectionResultValidator):
     def validate_color(cls, v: Color):
         return v.as_hex()
 
-class CandidateCountyResults(CandidateCountyResultsBase, table=True):
-    created_at: Optional[datetime] = SQLModelField(
-        sa_column=Column(
-            TIMESTAMP(timezone=True),
-            server_default=text("CURRENT_TIMESTAMP")
-        )
-    )
-    updated_at: Optional[datetime] = SQLModelField(
-        sa_column=Column(
-            TIMESTAMP(timezone=True),
-            server_default=text("CURRENT_TIMESTAMP"),
-            server_onupdate=text("CURRENT_TIMESTAMP"),
-        ),
-        default=None
-    )
-    candidate: "CandidateName" = Relationship(back_populates='county_results', link_model=CandidateCountyResultsLink)
+# class CandidateCountyResults(CandidateCountyResultsBase, table=True):
+#     created_at: Optional[datetime] = SQLModelField(
+#         sa_column=Column(
+#             TIMESTAMP(timezone=True),
+#             server_default=text("CURRENT_TIMESTAMP")
+#         )
+#     )
+#     updated_at: Optional[datetime] = SQLModelField(
+#         sa_column=Column(
+#             TIMESTAMP(timezone=True),
+#             server_default=text("CURRENT_TIMESTAMP"),
+#             server_onupdate=text("CURRENT_TIMESTAMP"),
+#         ),
+#         default=None
+#     )
+#     candidate: "CandidateName" = Relationship(back_populates='county_results', link_model=CandidateCountyResultsLink)
 
 
 
@@ -346,24 +343,24 @@ class RaceDetailsBase(ElectionResultValidator):
     _set_office_type = model_validator(mode='before')(funcs.set_office_type)
     # _set_district_number = model_validator(mode='before')(funcs.set_district_number)
 
-class RaceDetails(RaceDetailsBase, table=True):
-    created_at: Optional[datetime] = SQLModelField(
-        sa_column=Column(
-            TIMESTAMP(timezone=True),
-            server_default=text("CURRENT_TIMESTAMP")
-        )
-    )
-    updated_at: Optional[datetime] = SQLModelField(
-        sa_column=Column(
-            TIMESTAMP(timezone=True),
-            server_default=text("CURRENT_TIMESTAMP"),
-            server_onupdate=text("CURRENT_TIMESTAMP"),
-        ),
-        default=None
-    )
-    candidates: list["CandidateName"] = Relationship(back_populates='race', link_model=CandidateRaceLink)
-    counties: list["County"] = Relationship(back_populates='races', link_model=RaceCountyLink)
-    office_summary: Optional["StatewideOfficeSummary"] = Relationship(back_populates="race_data", link_model=StatewideRaceCountyLink)
+# class RaceDetails(RaceDetailsBase, table=True):
+#     created_at: Optional[datetime] = SQLModelField(
+#         sa_column=Column(
+#             TIMESTAMP(timezone=True),
+#             server_default=text("CURRENT_TIMESTAMP")
+#         )
+#     )
+#     updated_at: Optional[datetime] = SQLModelField(
+#         sa_column=Column(
+#             TIMESTAMP(timezone=True),
+#             server_default=text("CURRENT_TIMESTAMP"),
+#             server_onupdate=text("CURRENT_TIMESTAMP"),
+#         ),
+#         default=None
+#     )
+#     candidates: list["CandidateName"] = Relationship(back_populates='race', link_model=CandidateRaceLink)
+#     counties: list["County"] = Relationship(back_populates='races', link_model=RaceCountyLink)
+#     office_summary: Optional["StatewideOfficeSummary"] = Relationship(back_populates="race_data", link_model=StatewideRaceCountyLink)
 
 
 class CountySummaryBase(ElectionResultValidator):
@@ -380,22 +377,22 @@ class CountySummaryBase(ElectionResultValidator):
     county_name: Optional[str] = SQLModelField(foreign_key='county.name')
     # counties: "County" = Relationship(back_populates='summary')
 
-class CountySummary(CountySummaryBase, table=True):
-    created_at: Optional[datetime] = SQLModelField(
-        sa_column=Column(
-            TIMESTAMP(timezone=True),
-            server_default=text("CURRENT_TIMESTAMP")
-        )
-    )
-    updated_at: Optional[datetime] = SQLModelField(
-        sa_column=Column(
-            TIMESTAMP(timezone=True),
-            server_default=text("CURRENT_TIMESTAMP"),
-            server_onupdate=text("CURRENT_TIMESTAMP"),
-        ),
-        default=None
-    )
-    counties: "County" = Relationship(back_populates='summary')
+# class CountySummary(CountySummaryBase, table=True):
+#     created_at: Optional[datetime] = SQLModelField(
+#         sa_column=Column(
+#             TIMESTAMP(timezone=True),
+#             server_default=text("CURRENT_TIMESTAMP")
+#         )
+#     )
+#     updated_at: Optional[datetime] = SQLModelField(
+#         sa_column=Column(
+#             TIMESTAMP(timezone=True),
+#             server_default=text("CURRENT_TIMESTAMP"),
+#             server_onupdate=text("CURRENT_TIMESTAMP"),
+#         ),
+#         default=None
+#     )
+#     counties: "County" = Relationship(back_populates='summary')
 
 class CountyBase(ElectionResultValidator):
     name: str = SQLModelField(alias='N', primary_key=True)
@@ -409,29 +406,29 @@ class CountyBase(ElectionResultValidator):
     def validate_color(cls, v: Color):
         return v.as_hex()
 
-class County(CountyBase, table=True):
-    created_at: Optional[datetime] = SQLModelField(
-        sa_column=Column(
-            TIMESTAMP(timezone=True),
-            server_default=text("CURRENT_TIMESTAMP")
-        )
-    )
-    updated_at: Optional[datetime] = SQLModelField(
-        sa_column=Column(
-            TIMESTAMP(timezone=True),
-            server_default=text("CURRENT_TIMESTAMP"),
-            server_onupdate=text("CURRENT_TIMESTAMP"),
-        ),
-        default=None
-    )
-    races: list["RaceDetails"] = Relationship(back_populates='counties', link_model=RaceCountyLink)
-    candidates: list["CandidateName"] = Relationship(back_populates='county_name', link_model=CandidateCountyLink)
-    summary: "CountySummary" = Relationship(back_populates='counties')
-    version_number: "ResultVersionNumber" = Relationship(back_populates='county')
+# class County(CountyBase, table=True):
+#     created_at: Optional[datetime] = SQLModelField(
+#         sa_column=Column(
+#             TIMESTAMP(timezone=True),
+#             server_default=text("CURRENT_TIMESTAMP")
+#         )
+#     )
+#     updated_at: Optional[datetime] = SQLModelField(
+#         sa_column=Column(
+#             TIMESTAMP(timezone=True),
+#             server_default=text("CURRENT_TIMESTAMP"),
+#             server_onupdate=text("CURRENT_TIMESTAMP"),
+#         ),
+#         default=None
+#     )
+#     races: list["RaceDetails"] = Relationship(back_populates='counties', link_model=RaceCountyLink)
+#     candidates: list["CandidateName"] = Relationship(back_populates='county_name', link_model=CandidateCountyLink)
+#     summary: "CountySummary" = Relationship(back_populates='counties')
+#     version_number: "ResultVersionNumber" = Relationship(back_populates='county')
 
 
 class StatewideCandidateSummaryBase(ElectionResultValidator):
-    name: str = SQLModelField(primary_key=True)
+    name: str = SQLModelField(alias='N', primary_key=True)
     first_name: Optional[str] = SQLModelField(default=None)
     last_name: Optional[str] = SQLModelField(default=None)
     party: str = SQLModelField(alias='P')
@@ -446,34 +443,35 @@ class StatewideCandidateSummaryBase(ElectionResultValidator):
     @model_validator(mode='before')
     @classmethod
     def parse_name(cls, values):
-        if _name := values['name']:
+        if _name := values.get('name'):
             _clean_name = _name.replace("(I)", "").strip()
             name = HumanName(_clean_name)
             values['first_name'] = name.first
             values['last_name'] = name.last
         return values
+    
     @field_validator('color')
     def validate_color(cls, v: Color):
         return v.as_hex()
 
 
-class StatewideCandidateSummary(StatewideCandidateSummaryBase, table=True):
-    created_at: Optional[datetime] = SQLModelField(
-        sa_column=Column(
-            TIMESTAMP(timezone=True),
-            server_default=text("CURRENT_TIMESTAMP")
-        )
-    )
-    updated_at: Optional[datetime] = SQLModelField(
-        sa_column=Column(
-            TIMESTAMP(timezone=True),
-            server_default=text("CURRENT_TIMESTAMP"),
-            server_onupdate=text("CURRENT_TIMESTAMP"),
-        ),
-        default=None
-    )
-    office: "StatewideOfficeSummary" = Relationship(back_populates='candidates')
-    candidate_data: "CandidateName" = Relationship(back_populates='office', link_model=StatewideCanadidateRaceLink)
+# class StatewideCandidateSummary(StatewideCandidateSummaryBase, table=True):
+#     created_at: Optional[datetime] = SQLModelField(
+#         sa_column=Column(
+#             TIMESTAMP(timezone=True),
+#             server_default=text("CURRENT_TIMESTAMP")
+#         )
+#     )
+#     updated_at: Optional[datetime] = SQLModelField(
+#         sa_column=Column(
+#             TIMESTAMP(timezone=True),
+#             server_default=text("CURRENT_TIMESTAMP"),
+#             server_onupdate=text("CURRENT_TIMESTAMP"),
+#         ),
+#         default=None
+#     )
+#     office: "StatewideOfficeSummary" = Relationship(back_populates='candidates')
+#     candidate_data: "CandidateName" = Relationship(back_populates='office', link_model=StatewideCanadidateRaceLink)
 
 
 class StatewideOfficeSummaryBase(ElectionResultValidator):
@@ -510,21 +508,21 @@ class StatewideOfficeSummaryBase(ElectionResultValidator):
         return self
 
 
-class StatewideOfficeSummary(StatewideOfficeSummaryBase, table=True):
-    created_at: Optional[datetime] = SQLModelField(
-        sa_column=Column(
-            TIMESTAMP(timezone=True),
-            server_default=text("CURRENT_TIMESTAMP")
-        )
-    )
-    updated_at: Optional[datetime] = SQLModelField(
-        sa_column=Column(
-            TIMESTAMP(timezone=True),
-            server_default=text("CURRENT_TIMESTAMP"),
-            server_onupdate=text("CURRENT_TIMESTAMP"),
-        ),
-        default=None
-    )
-    candidates: list["StatewideCandidateSummary"] = Relationship(back_populates='office')
-    race_data: "RaceDetails" = Relationship(back_populates='office_summary', link_model=StatewideRaceCountyLink)
-    version_number: "ResultVersionNumber" = Relationship(back_populates='statewide')
+# class StatewideOfficeSummary(StatewideOfficeSummaryBase, table=True):
+#     created_at: Optional[datetime] = SQLModelField(
+#         sa_column=Column(
+#             TIMESTAMP(timezone=True),
+#             server_default=text("CURRENT_TIMESTAMP")
+#         )
+#     )
+#     updated_at: Optional[datetime] = SQLModelField(
+#         sa_column=Column(
+#             TIMESTAMP(timezone=True),
+#             server_default=text("CURRENT_TIMESTAMP"),
+#             server_onupdate=text("CURRENT_TIMESTAMP"),
+#         ),
+#         default=None
+#     )
+#     candidates: list["StatewideCandidateSummary"] = Relationship(back_populates='office')
+#     race_data: "RaceDetails" = Relationship(back_populates='office_summary', link_model=StatewideRaceCountyLink)
+#     version_number: "ResultVersionNumber" = Relationship(back_populates='statewide')
