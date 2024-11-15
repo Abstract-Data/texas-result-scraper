@@ -1,4 +1,10 @@
 import abc
+from typing import  Optional, Annotated,  ClassVar, List, TypeVar, Union, Protocol, Type, Any
+from pathlib import Path
+import csv
+from datetime import datetime, date
+import hashlib
+
 from sqlmodel import (
     SQLModel,
     Field as SQLModelField,
@@ -14,15 +20,11 @@ from sqlmodel import (
 )
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 from sqlalchemy.orm import declared_attr
-from datetime import datetime, date
 from pydantic import model_validator, ConfigDict, field_validator, BaseModel, computed_field
 from pydantic_extra_types.color import Color
-from typing import  Optional, Annotated,  ClassVar, List, TypeVar, Union, Protocol, Type, Any
-from pathlib import Path
-import csv
 from nameparser import HumanName
-import texas_result_scraper.result_funcs as funcs
-import hashlib
+
+import texas_result_scraper.funcs as funcs
 
 
 T = TypeVar('T')

@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Optional
 from datetime import datetime
 from sqlmodel import Field as SQLModelField
-import texas_result_scraper.result_bases as base
+import models.bases as base
 
 
 class ResultVersionNumberPublic(base.ResultVersionNumberBase):

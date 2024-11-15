@@ -1,9 +1,12 @@
-import texas_result_scraper.result_db_models as db_models
-import texas_result_scraper.result_public_models as public_models
 from typing import Tuple
 import abc
+from dataclasses import dataclass
+
 from sqlmodel import SQLModel
 from pydantic.dataclasses import dataclass as pydantic_dataclass
+
+from texas_result_scraper.models import db_models
+from texas_result_scraper.models import public_models
 
 
 @pydantic_dataclass
@@ -11,8 +14,7 @@ class ModelTypes:
     db_model: SQLModel
     public_model: SQLModel
 
-
-@pydantic_dataclass 
+@dataclass
 class ModelGroup:
     ResultVersionNumber: SQLModel
     CandidateName: SQLModel

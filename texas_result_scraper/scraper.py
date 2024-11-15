@@ -1,17 +1,17 @@
 import abc
 from typing import Dict, List, ClassVar, Type, Generator, Optional, Any
 from pathlib import Path
-from dataclasses import dataclass, field
 from time import sleep
+from dataclasses import dataclass, field
+
 from sqlmodel import SQLModel, Session, select, text
 from sqlalchemy.engine import Engine
 from sqlalchemy import event
-
 import cfscrape
-from texas_result_scraper.utils.toml_reader import TomlReader
-from texas_result_scraper.result_db import Session
-import texas_result_scraper.result_models as model
-import texas_result_scraper.result_bases as base
+
+from utils import db, TomlReader
+import model_groups as model
+import models.bases as base
 
 EXAMPLES = (47009, 242), (47010, 278), (49681, 665), (49666, 661)
 

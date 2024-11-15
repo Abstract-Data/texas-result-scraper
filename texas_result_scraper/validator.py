@@ -1,3 +1,8 @@
+from typing import  Optional, Annotated,  ClassVar, List
+from pathlib import Path
+import csv
+import hashlib
+from datetime import datetime
 
 from sqlmodel import (
     SQLModel,
@@ -14,15 +19,11 @@ from sqlmodel import (
 )
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 from sqlalchemy.orm import declared_attr
-from datetime import datetime
 from pydantic import model_validator, ConfigDict, field_validator, BaseModel, validator, root_validator
 from pydantic_extra_types.color import Color
-from typing import  Optional, Annotated,  ClassVar, List
-from pathlib import Path
-import csv
+
 from nameparser import HumanName
-import texas_result_scraper.result_funcs as funcs
-import hashlib
+from . import funcs
 
 
 # TODO: Fix Candidate details so updates can be attached to each one, probably using a link model.

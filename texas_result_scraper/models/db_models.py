@@ -1,6 +1,6 @@
-import texas_result_scraper.result_bases as base
-from sqlmodel import Relationship, Field as SQLModelField, SQLModel
 from typing import Callable, Optional
+from sqlmodel import Relationship, Field as SQLModelField, SQLModel
+from ..models import bases as base  # Preferred
 
 
 

@@ -1,10 +1,12 @@
-from pydantic.dataclasses import dataclass as pydantic_dataclass
-from sqlmodel import Field as SQLModelField
 from pathlib import Path
 from typing import List, ForwardRef
-from texas_result_scraper.result_public_models import ResultVersionNumberPublic
-from texas_result_scraper.scraper import ElectionResultTicker
 import json
+
+from pydantic.dataclasses import dataclass as pydantic_dataclass
+from sqlmodel import Field as SQLModelField
+
+from .models.public_models import ResultVersionNumberPublic
+from .scraper import ElectionResultTicker
 
 
 EXCLUDE = {

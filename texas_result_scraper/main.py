@@ -1,17 +1,18 @@
 from __future__ import annotations
-from texas_result_scraper.scraper import ElectionResultTicker, TomlReader, model
-from texas_result_scraper.flat_file import GitHubFile
-from texas_result_scraper.result_db import engine, psql_engine
+from typing import TypeVar, Generic, Optional, Any
+import json
 from pathlib import Path
 import csv
 import itertools
-from sqlalchemy.orm.exc import StaleDataError
 from time import sleep
+
+from sqlalchemy.orm.exc import StaleDataError
 from sqlmodel import Session, text
 from pydantic import BaseModel
-from typing import TypeVar, Generic, Optional, Any
-import json
 
+from texas_result_scraper.scraper import ElectionResultTicker, TomlReader, model
+from texas_result_scraper.flat_file import GitHubFile
+from texas_result_scraper.utils import db, TomlReader
 
 # TODO: Fix github flat file functionaility to output as a SQLModel object without Instrumented Lists
 # TODO: Fix Scraper.py to upload pytdanticmodels of SQLModel, without relationships. Eliminate circular loading of data. 
