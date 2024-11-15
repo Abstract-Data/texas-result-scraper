@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eed8ba8d-217c-4544-9bb7-e408cf1f55e0" name="Changes" comment="added fetch" />
+    <list default="true" id="eed8ba8d-217c-4544-9bb7-e408cf1f55e0" name="Changes" comment="added fetch">
+      <change beforePath="$PROJECT_DIR$/texas_result_scraper/flat_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/texas_result_scraper/flat_file.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -124,7 +126,7 @@
       <workItem from="1731120258231" duration="1480000" />
       <workItem from="1731277621985" duration="6392000" />
       <workItem from="1731441815788" duration="36219000" />
-      <workItem from="1731608271098" duration="10471000" />
+      <workItem from="1731608271098" duration="13176000" />
     </task>
     <task id="LOCAL-00001" summary="Updated models">
       <option name="closed" value="true" />
@@ -147,6 +149,17 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Updated models" />

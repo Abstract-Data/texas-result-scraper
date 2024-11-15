@@ -73,5 +73,5 @@ class GitHubFile:
             Path(__file__).parent / 'data'/ f'tx-{self.ticker.election_id}-{self.ticker.version_no.version_id}.json',
             'w') as f:
             f.write(
-                self.data.model_dump_json(exclude_none=True, indent=4)
+                self.data.model_dump_json(exclude_none=True)
                 )
