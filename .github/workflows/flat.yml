@@ -29,9 +29,14 @@ jobs:
           poetry install
       - name: List directory structure
         run: ls -la
+
       - name: Run flat
+        continue-on-error: true
         run: |
-          python texas_result_scraper/main.py  
+          if ! python texas_result_scraper/main.py; then
+            echo "Script failed, skipping commit"
+            exit 0
+          fi
           git config --global user.email "dev@abstractdata.io"
           git config --global user.name "John R. Eakin"
           git add -A
@@ -41,3 +46,20 @@ jobs:
           git add . 
           git commit -m "Data updated at ${timestamp}"
           git push
+            
+      - name: Check for changes
+        id: check_changes
+        if: steps.run_script.outcome == 'success'
+        run: |
+              git diff --quiet || echo "has_changes=true" >> $GITHUB_OUTPUT
+              
+      - name: Commit and push if changed
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+              git config --global user.email "dev@abstractdata.io"
+              git config --global user.name "John R. Eakin"
+              timestamp=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+              git add texas_result_scraper/data
+              git add .
+              git commit -m "Data updated at ${timestamp}"
+              git push || exit 0
