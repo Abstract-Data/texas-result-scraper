@@ -9,9 +9,9 @@ on:
       - "[0-9]+.[0-9]+.[0-9]+rc[0-9]+"
 
 env:
-  PACKAGE_NAME: "abstract-texas-result-scraper"
+  PACKAGE_NAME: "texas-result-scraper"
   OWNER: "Abstract-Data"
-  TAP_NAME: "texas-result-scraper"
+#   TAP_NAME: "texas-result-scraper"
 
 jobs:
   details:
