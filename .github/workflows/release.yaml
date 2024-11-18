@@ -11,7 +11,7 @@ on:
 env:
   PACKAGE_NAME: "texas-result-scraper"
   OWNER: "Abstract-Data"
-#   TAP_NAME: "texas-result-scraper"
+  TAP_NAME: "texas-result-scraper"
 
 jobs:
   details:
