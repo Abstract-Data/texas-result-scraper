@@ -47,7 +47,7 @@ jobs:
     steps:
       - name: Fetch information from TestPyPI
         run: |
-          response=$(curl -s https://test.pypi.org/pypi/${{ env.PACKAGE_NAME }}/json || echo "{}")
+          response=$(curl -s https://test.pypi.org/project/${{ env.PACKAGE_NAME }}/json || echo "{}")
           latest_previous_version=$(echo $response | jq --raw-output "select(.releases != null) | .releases | keys_unsorted | last")
           if [ -z "$latest_previous_version" ]; then
             echo "Package not found on TestPyPI."
