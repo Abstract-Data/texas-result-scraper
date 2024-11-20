@@ -32,6 +32,8 @@ jobs:
 
       - name: Setup Git LFS
         run: |
+          git config --global user.email "dev@abstractdata.io"
+          git config --global user.name "John R. Eakin"
           git lfs install
           git lfs track "*.json"
           git add .gitattributes
@@ -44,8 +46,6 @@ jobs:
             echo "Script failed, skipping commit"
             exit 0
           fi
-          git config --global user.email "dev@abstractdata.io"
-          git config --global user.name "John R. Eakin"
           git add -A
           timestamp=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
           git fetch

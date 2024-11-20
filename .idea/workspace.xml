@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eed8ba8d-217c-4544-9bb7-e408cf1f55e0" name="Changes" comment="added fetch" />
+    <list default="true" id="eed8ba8d-217c-4544-9bb7-e408cf1f55e0" name="Changes" comment="added fetch">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/flat.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/flat.yml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
