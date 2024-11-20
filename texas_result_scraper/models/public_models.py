@@ -6,14 +6,14 @@ import models.bases as base
 
 
 class ResultVersionNumberPublic(base.ResultVersionNumberBase):
-    statewide: dict[int, "StatewideOfficeSummaryPublic"] = SQLModelField(default_factory=dict)
-    county: dict[str, "CountyPublic"] = SQLModelField(default_factory=dict)
-    races: list["RaceDetailsPublic"] = SQLModelField(default_factory=list)
+    statewide: dict[int, StatewideOfficeSummaryPublic] = SQLModelField(default_factory=dict)
+    county: dict[str, CountyPublic] = SQLModelField(default_factory=dict)
+    races: list[RaceDetailsPublic] = SQLModelField(default_factory=list)
     updated_at: str = SQLModelField(default=datetime.strftime(datetime.now(), "%Y-%m-%d %H:%M:%S"))
 
 
 class CandidateNamePublic(base.CandidateNameBase):
-    county_results: list["CandidateCountyResultsPublic"] = SQLModelField(default_factory=list)
+    county_results: list[CandidateCountyResultsPublic] = SQLModelField(default_factory=list)
     # race: "RaceDetailsPublic" = SQLModelField(default=None)
     # office: Optional["StatewideCandidateSummaryPublic"] = SQLModelField(default=None)
     
@@ -25,7 +25,7 @@ class CandidateCountyResultsPublic(base.CandidateCountyResultsBase):
 
 class RaceDetailsPublic(base.RaceDetailsBase):
     candidates: list[CandidateNamePublic] = SQLModelField(default_factory=list)
-    counties: list["CountyRaceDetailsPublic"] = SQLModelField(default_factory=list)
+    counties: list[CountyRaceDetailsPublic] = SQLModelField(default_factory=list)
 
 class CountyRaceDetailsPublic(base.CountyRaceDetailsBase):
     # candidates: list[CandidateCountyResultsPublic] = SQLModelField(default_factory=list)

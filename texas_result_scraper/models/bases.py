@@ -68,13 +68,11 @@ class ResultVersionNumberBase(ElectionResultValidator):
     @field_validator('election_date', mode='before')
     @classmethod
     def format_date(cls, value: str) -> datetime:
-        try:
-            # Parse input date (assuming MM/DD/YYYY format)
-            date_obj = datetime.strptime(value, '%m%d%Y')
-            # Format to YYYYMMDD
-            return date_obj.date()
-        except ValueError as e:
-            raise ValueError(f"Invalid date format: {value}. Expected MM/DD/YYYY") from e
+        for fmt in ['%m%d%Y', '%Y-%m-%d']:
+            try:
+                return datetime.strptime(value, fmt).date()
+            except ValueError:
+                pass
     
 
 class CandidateNameBase(ElectionResultValidator):
@@ -141,13 +139,13 @@ class CandidateCountyResultsBase(ElectionResultValidator):
     early_votes: int
     total_votes: int = SQLModelField(...)
     percent: float = SQLModelField(...)
-    color: Color = SQLModelField(..., sa_type=String, exclude=True)
-    ballot_order: int = SQLModelField(..., exclude=True)
+    color: Color = SQLModelField(default_factory=Color, sa_type=String)
+    ballot_order: Optional[int] = SQLModelField(default=None)
     
 
-    @field_validator('color')
-    def validate_color(cls, v: Color):
-        return v.as_hex()
+    # @field_validator('color')
+    # def validate_color(cls, v: Color):
+    #     return v.as_hex()
     
 
 class RaceDetailsBase(ElectionResultValidator):
@@ -209,7 +207,7 @@ class CountyRaceDetailsBase(ElectionResultValidator):
     # office_type: Optional[str] = SQLModelField(default=None)
     # office_district: Optional[str] = SQLModelField(default=None)
     county_total_votes: int = SQLModelField(default=0)
-    county_ballot_order: int = SQLModelField(..., exclude=True)
+    county_ballot_order: int = SQLModelField(...)
     county_precincts_reporting: int = SQLModelField(default=0)
     county_registered_voters: int = SQLModelField(default=0)
     county_precincts: int = SQLModelField(default=0)
@@ -262,17 +260,14 @@ class CountySummaryBase(ElectionResultValidator):
 class CountyBase(ElectionResultValidator):
     name: str = SQLModelField(alias='N', primary_key=True)
     # registered_voters: int = SQLModelField(alias='TV')
-    color: Color = SQLModelField(sa_type=String, exclude=True)
+    color: Color = SQLModelField(sa_type=String, default_factory=Color)
     summary: Optional[ElectionResultValidator] = SQLModelField(default=None)
 
     
     
     def __repr__(cls) -> str:
         return f"{cls.__class__.__name__}({cls.name.title()} county)"
-    
-    @field_validator('color')
-    def validate_color(cls, v: Color):
-        return v.as_hex()
+
     
     
     
@@ -282,7 +277,7 @@ class StatewideCandidateSummaryBase(ElectionResultValidator):
     last_name: Optional[str] = SQLModelField(default=None)
     incumbent: Optional[bool] = SQLModelField(default=None)
     party: str = SQLModelField(...)
-    color: Color = SQLModelField(..., sa_type=String, exclude=True)
+    color: Color = SQLModelField(..., sa_type=String, default_factory=Color)
     total_votes: int = SQLModelField(...)
     ballot_order: int = SQLModelField(...)
     # endorsement_id: Optional[int] = None
@@ -314,10 +309,7 @@ class StatewideCandidateSummaryBase(ElectionResultValidator):
             else:
                 values['name'] = _clean_name
         return values
-    
-    @field_validator('color')
-    def validate_color(cls, v: Color):
-        return v.as_hex()
+
     
     
     

@@ -10,6 +10,11 @@ jobs:
   scheduled:
     runs-on: ubuntu-latest
     steps:
+      - name: Setup Git LFS
+        run: |
+          git lfs install
+          git lfs track "*.json"
+
       - name: Setup deno
         uses: denoland/setup-deno@main
         with:
@@ -59,7 +64,7 @@ jobs:
               git config --global user.email "dev@abstractdata.io"
               git config --global user.name "John R. Eakin"
               timestamp=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
-              git add texas_result_scraper/data
-              git add .
+              git lfs track "texas_result_scraper/data/*.json"
+              git add texas_result_scraper/data/*.json
               git commit -m "Data updated at ${timestamp}"
               git push || exit 0
