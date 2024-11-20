@@ -48,8 +48,9 @@ jobs:
           git add -A
           timestamp=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
           git fetch
-          git add texas_result_scraper/data
-          git add . 
+          git lfs track texas_result_scraper/data/*.json
+          git add texas_result_scraper/data/*.json
+#          git add .
           git commit -m "Data updated at ${timestamp}"
           git push
             
@@ -59,13 +60,13 @@ jobs:
 #        run: |
 #              git diff --quiet || echo "has_changes=true" >> $GITHUB_OUTPUT
               
-      - name: Commit and push if changed
-#        if: steps.check_changes.outputs.has_changes == 'true'
-        run: |
-              git config --global user.email "dev@abstractdata.io"
-              git config --global user.name "John R. Eakin"
-              timestamp=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
-              git lfs track "texas_result_scraper/data/*.json"
-              git add texas_result_scraper/data/*.json
-              git commit -m "Data updated at ${timestamp}"
-              git push || exit 0
+#      - name: Commit and push if changed
+##        if: steps.check_changes.outputs.has_changes == 'true'
+#        run: |
+#              git config --global user.email "dev@abstractdata.io"
+#              git config --global user.name "John R. Eakin"
+#              timestamp=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+#              git lfs track "texas_result_scraper/data/*.json"
+#              git add texas_result_scraper/data/*.json
+#              git commit -m "Data updated at ${timestamp}"
+#              git push || exit 0
