@@ -53,14 +53,14 @@ jobs:
           git commit -m "Data updated at ${timestamp}"
           git push
             
-      - name: Check for changes
-        id: check_changes
-        if: steps.run_script.outcome == 'success'
-        run: |
-              git diff --quiet || echo "has_changes=true" >> $GITHUB_OUTPUT
+#      - name: Check for changes
+#        id: check_changes
+#        if: steps.run_script.outcome == 'success'
+#        run: |
+#              git diff --quiet || echo "has_changes=true" >> $GITHUB_OUTPUT
               
       - name: Commit and push if changed
-        if: steps.check_changes.outputs.has_changes == 'true'
+#        if: steps.check_changes.outputs.has_changes == 'true'
         run: |
               git config --global user.email "dev@abstractdata.io"
               git config --global user.name "John R. Eakin"
