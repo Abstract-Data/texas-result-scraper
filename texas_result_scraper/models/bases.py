@@ -73,6 +73,18 @@ class ResultVersionNumberBase(ElectionResultValidator):
                 return datetime.strptime(value, fmt).date()
             except ValueError:
                 pass
+            
+    def flatten_races(self):
+        return [x.flatten() for x in self.races]
+    
+    def flatten_counties(self):
+        return [x.summary.model_dump() for x in self.county.values()]
+
+    def flatten_statewide(self):
+        data = []
+        for office in self.statewide.values():
+            data.extend(office.flatten())
+        return data
     
 
 class CandidateNameBase(ElectionResultValidator):
@@ -141,7 +153,11 @@ class CandidateCountyResultsBase(ElectionResultValidator):
     percent: float = SQLModelField(...)
     color: Color = SQLModelField(default_factory=Color, sa_type=String)
     ballot_order: Optional[int] = SQLModelField(default=None)
-    
+
+    @computed_field
+    @property
+    def election_day_votes(self) -> int:
+        return self.total_votes - self.early_votes
 
     # @field_validator('color')
     # def validate_color(cls, v: Color):
@@ -197,6 +213,23 @@ class RaceDetailsBase(ElectionResultValidator):
             return self
             # raise ValueError(f"Office: {self.office} Candidate vote totals are not complete - found zero values")
         return self
+    
+    def flatten(self):
+        race_details = {
+        'office': self.office,
+        'office_type': self.office_type,
+        'office_district': self.office_district,
+        }
+        for candidate in self.candidates:
+            race_details['candidate'] = candidate.full_name
+            race_details['party'] = candidate.party
+            for county in candidate.county_results:
+                race_details['county'] = county.county
+                race_details['early_votes'] = county.early_votes
+                race_details['election_day_votes'] = county.election_day_votes
+                race_details['total_votes'] = county.total_votes
+                race_details['percent_votes'] = county.percent
+        return race_details
     
     _set_office_type = model_validator(mode='before')(funcs.set_office_type)
 
@@ -346,3 +379,38 @@ class StatewideOfficeSummaryBase(ElectionResultValidator):
                 self.winner_margin = 0
                 self.winner_percent = 100
         return self
+
+    def flatten(self):
+        """Convert office data to hashable format for deduplication"""
+        all_office_data = set()
+
+        base_data = {
+            'version': self.version_id,
+            'office': self.name,
+            'office_type': self.office_type,
+            'office_district': self.office_district,
+            'winner': self.winner,
+            'winner_party': self.winner_party,
+            'winner_margin': self.winner_margin,
+            'winner_percent': self.winner_percent,
+        }
+
+        for candidate in self.candidates:
+            for county in candidate.county_results:
+                # Create new dict for each county result
+                row_data = {
+                    **base_data,
+                    'candidate': candidate.name,
+                    'party': candidate.party,
+                    'county': county.county,
+                    'early_votes': county.early_votes,
+                    'election_day_votes': county.election_day_votes,
+                    'total_votes': county.total_votes,
+                    'percent': county.percent
+                }
+                # Convert to hashable tuple of key-value pairs
+                hashable_data = frozenset(row_data.items())
+                all_office_data.add(hashable_data)
+
+        # Convert back to list of dicts
+        return [dict(data) for data in all_office_data]
