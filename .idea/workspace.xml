@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eed8ba8d-217c-4544-9bb7-e408cf1f55e0" name="Changes" comment="added fetch">
-      <change beforePath="$PROJECT_DIR$/texas_result_scraper/data/tx-49664-1009.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitattributes" beforeDir="false" afterPath="$PROJECT_DIR$/.gitattributes" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
