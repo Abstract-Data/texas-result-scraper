@@ -39,7 +39,6 @@ jobs:
           git add .gitattributes
           git commit -m "Add .gitattributes"
 
-
       - name: Run flat
         continue-on-error: true
         run: |
