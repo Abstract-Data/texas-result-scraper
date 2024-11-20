@@ -35,7 +35,6 @@ P2024_ELECTION_RESULTS = ElectionResultTicker(election_id=49664)
 make_flat_file = GitHubFile(P2024_ELECTION_RESULTS)
 make_flat_file.github_flat_file()
 make_flat_file.write()
-output = make_flat_file.read()
 
 # with Session(engine) as session:
 #     session.execute(
