@@ -36,8 +36,6 @@ jobs:
           git config --global user.name "John R. Eakin"
           git lfs install
           git lfs track "*.json"
-          git add .gitattributes
-          git commit -m "Add .gitattributes"
 
       - name: Run flat
         continue-on-error: true
