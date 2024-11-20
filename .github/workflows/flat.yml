@@ -50,7 +50,6 @@ jobs:
           git fetch
           git lfs track texas_result_scraper/data/*.json
           git add texas_result_scraper/data/*.json
-#          git add .
           git commit -m "Data updated at ${timestamp}"
           git push
             
