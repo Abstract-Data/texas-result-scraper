@@ -43,8 +43,14 @@ class GitHubFile:
                      .to_csv(self._set_file_name('race-results'), index=False))
         county_data = (pd.DataFrame(self.data.flatten_counties())
                        .to_csv(self._set_file_name('county-results'), index=False))
-        statewide_data = (pd.DataFrame(self.data.flatten_statewide())
-                          .to_csv(self._set_file_name('statewide-results'), index=False))
+        _state_data = pd.DataFrame(self.data.flatten_statewide())
+        statewide_data = _state_data.groupby(['office', 'candidate', 'party']).agg({
+            'early_votes': 'sum',
+            'election_day_votes': 'sum',
+            'total_votes': 'sum',
+            'percent': 'mean',
+            'winner_margin': 'first'
+        }).reset_index().to_csv(self._set_file_name('statewide-results'), index=False)
         return self
 
 
