@@ -5,6 +5,7 @@ from pathlib import Path
 import csv
 import itertools
 from time import sleep
+import pandas as pd
 
 from sqlalchemy.orm.exc import StaleDataError
 from sqlmodel import Session, text
@@ -18,23 +19,20 @@ from texas_result_scraper.utils import db, TomlReader
 # TODO: Fix Scraper.py to upload pytdanticmodels of SQLModel, without relationships. Eliminate circular loading of data. 
 
 
-# P2024_ELECTION_RESULTS = ElectionResultTicker(election_id=49664, engine=psql_engine)
 P2024_ELECTION_RESULTS = ElectionResultTicker(election_id=49664)
-# P2024_ELECTION_RESULTS.create_file()
-# P2024_ELECTION_RESULTS.pull_data()
-# P2024_ELECTION_RESULTS.create_models()
-# version_data = P2024_ELECTION_RESULTS.version_no.model_dump()
-
-# with open(Path(__file__).parent / 'model_schemas' / 'county_json.json', 'w') as f:
-#     json.dump(P2024_ELECTION_RESULTS.county_raw, f, indent=4)
-
-# with open(Path(__file__).parent / 'model_schemas' / 'county_json.json', 'r') as f:
-#     county_data = json.load(f)
 
 
 make_flat_file = GitHubFile(P2024_ELECTION_RESULTS)
 make_flat_file.github_flat_file()
-make_flat_file.write()
+make_flat_file.create_csv_files()
+
+
+# office_results = data.groupby(['office', 'office_type', 'office_district', 'candidate', 'party']).agg(
+#     early_votes=('early_votes', 'sum'),
+#     election_day_votes=('election_day_votes', 'sum'),
+#     total_votes=('total_votes', 'sum'),
+#     percent_votes=('percent_votes', 'mean')
+# ).reset_index()
 
 # with Session(engine) as session:
 #     session.execute(

@@ -27,15 +27,6 @@ jobs:
           pip install poetry
           poetry config virtualenvs.create false
           poetry install
-      - name: List directory structure
-        run: ls -la
-
-      - name: Setup Git LFS
-        run: |
-          git config --global user.email "dev@abstractdata.io"
-          git config --global user.name "John R. Eakin"
-          git lfs install
-          git lfs track "*.json"
 
       - name: Run flat
         continue-on-error: true
@@ -44,11 +35,12 @@ jobs:
             echo "Script failed, skipping commit"
             exit 0
           fi
+          git config --global user.email "dev@abstractdata.io"
+          git config --global user.name "John R. Eakin"
           git add -A
           timestamp=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
           git fetch
-          git lfs track texas_result_scraper/data/*.json
-          git add texas_result_scraper/data/*.json
+          git add texas_result_scraper/data/*.csv
           git commit -m "Data updated at ${timestamp}"
           git push
             

@@ -4,6 +4,7 @@ import json
 
 from pydantic.dataclasses import dataclass as pydantic_dataclass
 from sqlmodel import Field as SQLModelField
+import pandas as pd
 
 import models.public_models as public
 from .scraper import ElectionResultTicker
@@ -24,19 +25,29 @@ class GitHubFile:
     data: public.ResultVersionNumberPublic = None
     exclude: set = SQLModelField(default=EXCLUDE)
     file_name: str = SQLModelField(default=None)
-    
+
     def __post_init__(self):
         self.ticker.create_file()
-
-
+    def _set_file_name(self, file: str, file_type: str = 'csv') -> Path:
+        return Path(__file__).parent / 'data' / f'{self.file_name}-{file}.{file_type}'
     def github_flat_file(self):
         ticker = self.ticker
         ticker.pull_data()
         ticker.create_models()
         self.data = ticker.version_no
-        self.file_name = f'tx-{self.ticker.election_id}-{self.ticker.version_no.version_id}.json'
+        self.file_name = f'tx-{self.ticker.election_id}-{self.ticker.version_no.version_id}'
         return self
-    
+
+    def create_csv_files(self):
+        race_data = (pd.DataFrame(self.data.flatten_races())
+                     .to_csv(self._set_file_name('race-results'), index=False))
+        county_data = (pd.DataFrame(self.data.flatten_counties())
+                       .to_csv(self._set_file_name('county-results'), index=False))
+        statewide_data = (pd.DataFrame(self.data.flatten_statewide())
+                          .to_csv(self._set_file_name('statewide-results'), index=False))
+        return self
+
+
     def dump_model(self):
         return self.data.model_dump()
     
