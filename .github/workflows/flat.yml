@@ -35,6 +35,7 @@ jobs:
           git lfs install
           git lfs track "*.json"
           git add .gitattributes
+          
 
       - name: Run flat
         continue-on-error: true
