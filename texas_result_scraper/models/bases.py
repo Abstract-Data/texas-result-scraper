@@ -215,21 +215,23 @@ class RaceDetailsBase(ElectionResultValidator):
         return self
     
     def flatten(self):
-        race_details = {
-        'office': self.office,
-        'office_type': self.office_type,
-        'office_district': self.office_district,
-        }
+        races = []
         for candidate in self.candidates:
-            race_details['candidate'] = candidate.full_name
-            race_details['party'] = candidate.party
+            race_details = {
+                'office': self.office,
+                'office_type': self.office_type,
+                'office_district': self.office_district,
+                'candidate': candidate.full_name,
+                'party': candidate.party
+            }
             for county in candidate.county_results:
                 race_details['county'] = county.county
                 race_details['early_votes'] = county.early_votes
                 race_details['election_day_votes'] = county.election_day_votes
                 race_details['total_votes'] = county.total_votes
                 race_details['percent_votes'] = county.percent
-        return race_details
+                races.append(race_details)
+        return races
     
     _set_office_type = model_validator(mode='before')(funcs.set_office_type)
 

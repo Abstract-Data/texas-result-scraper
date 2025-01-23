@@ -4,7 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="eed8ba8d-217c-4544-9bb7-e408cf1f55e0" name="Changes" comment="added fetch" />
+    <list default="true" id="eed8ba8d-217c-4544-9bb7-e408cf1f55e0" name="Changes" comment="added fetch">
+      <change beforePath="$PROJECT_DIR$/.idea/csv-editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/csv-editor.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/texas_result_scraper/data/tx-49664-1012-race-results.csv" beforeDir="false" afterPath="$PROJECT_DIR$/texas_result_scraper/data/tx-49664-1012-race-results.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/texas_result_scraper/data/tx-49664-1012-statewide-results.csv" beforeDir="false" afterPath="$PROJECT_DIR$/texas_result_scraper/data/tx-49664-1012-statewide-results.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/texas_result_scraper/flat_file.py" beforeDir="false" afterPath="$PROJECT_DIR$/texas_result_scraper/flat_file.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/texas_result_scraper/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/texas_result_scraper/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/texas_result_scraper/models/bases.py" beforeDir="false" afterPath="$PROJECT_DIR$/texas_result_scraper/models/bases.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -45,26 +53,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/johneakin/PyCharmProjects/texas-result-scraper&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.main.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/Users/johneakin/PyCharmProjects/texas-result-scraper",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;DatabaseDriversLRU&quot;: [
-      &quot;sqlite&quot;,
-      &quot;postgresql&quot;
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "sqlite",
+      "postgresql"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/texas_result_scraper" />
@@ -101,8 +110,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-PY-241.18034.82" />
-        <option value="bundled-python-sdk-975db3bf15a3-2767605e8bc2-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.18034.82" />
+        <option value="bundled-js-predefined-d6986cc7102b-deb605915726-JavaScript-PY-243.22562.180" />
+        <option value="bundled-python-sdk-85c76a3b01b3-9a18a617cbe4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.22562.180" />
       </set>
     </attachedChunks>
   </component>
@@ -125,6 +134,7 @@
       <workItem from="1732059298696" duration="76000" />
       <workItem from="1732059724332" duration="7737000" />
       <workItem from="1732073088561" duration="6298000" />
+      <workItem from="1737668069472" duration="6061000" />
     </task>
     <task id="LOCAL-00001" summary="Updated models">
       <option name="closed" value="true" />

@@ -143,28 +143,21 @@
             </Attribute>
           </value>
         </entry>
-        <entry key="/texas_result_scraper/data/1009_statewide_results.csv">
+        <entry key="/texas_result_scraper/data/tx-49664-1012-county-results.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="/texas_result_scraper/data/tx-49664-1009.json_statewide_results.csv">
+        <entry key="/texas_result_scraper/data/tx-49664-1012-race-results.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />
             </Attribute>
           </value>
         </entry>
-        <entry key="/texas_result_scraper/data/tx-49664-1009_statewide-results.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value="," />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="/texas_result_scraper/data/tx-49664-1009_statewide_results.csv">
+        <entry key="/texas_result_scraper/data/tx-49664-1012-statewide-results.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

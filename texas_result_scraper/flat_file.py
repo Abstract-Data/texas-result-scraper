@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, ForwardRef
+from typing import List, ForwardRef, Type
 import json
 
 from pydantic.dataclasses import dataclass as pydantic_dataclass
@@ -22,14 +22,18 @@ EXCLUDE = {
 @pydantic_dataclass(config={"arbitrary_types_allowed": True})
 class GitHubFile:
     ticker: ElectionResultTicker
-    data: public.ResultVersionNumberPublic = None
+    data: Type[public.ResultVersionNumberPublic] = None
     exclude: set = SQLModelField(default=EXCLUDE)
     file_name: str = SQLModelField(default=None)
+    written_file_names: List[Path] = SQLModelField(default_factory=list)
 
     def __post_init__(self):
         self.ticker.create_file()
     def _set_file_name(self, file: str, file_type: str = 'csv') -> Path:
-        return Path(__file__).parent / 'data' / f'{self.file_name}-{file}.{file_type}'
+        _name = Path(__file__).parent / 'data' / f'{self.file_name}-{file}.{file_type}'
+        self.written_file_names.append(_name)
+        return _name
+
     def github_flat_file(self):
         ticker = self.ticker
         ticker.pull_data()

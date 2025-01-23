@@ -20,12 +20,26 @@ from texas_result_scraper.utils import db, TomlReader
 
 
 P2024_ELECTION_RESULTS = ElectionResultTicker(election_id=49664)
+race_list = list(x.flatten() for x in P2024_ELECTION_RESULTS.races.values())
+races = []
+for x in race_list:
+    for y in x:
+        races.append(y)
 
-
+race_df = pd.DataFrame(races).drop_duplicates()
 make_flat_file = GitHubFile(P2024_ELECTION_RESULTS)
 make_flat_file.github_flat_file()
 make_flat_file.create_csv_files()
 
+results_ct = pd.crosstab(
+    index=[
+    race_df['office_type'], race_df['office'], race_df['candidate'], race_df['party']],
+    columns=race_df['county'],
+    values=race_df['total_votes'],
+    aggfunc='sum',
+    margins=True
+    )
+results_ct.to_json(Path.home() / 'Downloads/multiindex.json')
 
 # office_results = data.groupby(['office', 'office_type', 'office_district', 'candidate', 'party']).agg(
 #     early_votes=('early_votes', 'sum'),
